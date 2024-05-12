@@ -125,15 +125,21 @@ app.get("/error", (req, res) => {
 
 app.get("/post/:id", (req, res) => {
     // TODO: Render post detail page
+    const id = req.params.id;
 });
 app.post("/posts", (req, res) => {
+    // Corresponds with the code that uses the form method in home.handlebars
     // TODO: Add a new post and redirect to home
+    const title = req.body.title;
+    const content = req.body.content;
+    const user = currUser;  // TODO not sure about what to put for user?
+
+    addPost(title, content, user);
     res.redirect("home");
 });
 app.post("/like/:id", (req, res) => {
     // TODO: Update post likes
-    // let id = req.params.id;
-    // Do a call to getCurrentUser()
+    updatePostLikes(req, res);
 });
 app.get("/profile", isAuthenticated, (req, res) => {
     // TODO: Render profile page
@@ -143,15 +149,33 @@ app.get("/avatar/:username", (req, res) => {
 });
 app.post("/register", (req, res) => {
     // TODO: Register a new user
+    registerUser(req, res);  // TODO we just put here I guess?
 });
 app.post("/login", (req, res) => {
     // TODO: Login a user
+    loginUser(req, res);
 });
 app.get("/logout", (req, res) => {
     // TODO: Logout the user
+    logoutUser(req, res);
 });
 app.post("/delete/:id", isAuthenticated, (req, res) => {
     // TODO: Delete a post if the current user is the owner
+    // TODO does it automatically call isAuthenticated??
+    
+    const id = req.params.id;
+
+    if (id === currUser.id) {
+        // They are the owner of this id
+        
+        // TODO I'm guessing you logout too
+        logoutUser(findUserById(id));
+        // TODO actually delete
+
+    } else {
+        // They're not the owner
+        // TODO Error message
+    }    
 });
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -176,6 +200,8 @@ let users = [
     { id: 2, username: "AnotherUser", avatar_url: undefined, memberSince: "2024-01-02 09:00" },
 ];
 // TODO: add more posts and ids
+
+let currUser = null;
 
 // Function to find a user by username
 function findUserByUsername(username) {
@@ -212,26 +238,39 @@ function isAuthenticated(req, res, next) {
 
 // Function to register a user
 function registerUser(req, res) {
-    let qObj = req.query;
-    addUser(req.query.username);  // TODO: Idk if this is how it works, but just based on palindrome example
+    const user = findUserByUsername(req.body.username);
 
-    // TODO: Register a new user and redirect appropriately
-    res.redirect("home");
+    if (!user) {
+        // Username doesn't exist, so we can register new user
+        // TODO: Register a new user and redirect appropriately
+        res.redirect("home");
+        addUser(req.body.username);
+    } else {
+        // User already exists
+        // TODO Error message
+    }    
 }
 
 // Function to login a user
 function loginUser(req, res) {
-    let qObj = req.query;
-    // TODO maybe a global var to keep track of current user?
+    const user = findUserByUsername(req.body.username);
 
-    // TODO: Login a user and redirect appropriately
-    res.redirect("home");
+    // User exists
+    if (user) {
+        // Login user and redirect
+        currUser = user;
+        res.redirect("home");
+    } else {
+        // TODO make error message appear
+    }
+    
 }
 
 // Function to logout a user
 function logoutUser(req, res) {
     // TODO: Destroy session and redirect appropriately
 
+    currUser = null;
     res.redirect("/");
 }
 
@@ -243,6 +282,10 @@ function renderProfile(req, res) {
 // Function to update post likes
 function updatePostLikes(req, res) {
     // TODO: Increment post likes if conditions are met
+    // TODO if this post isn't the current user's, then get the post obj and increment likes
+    // TODO hopefully the number gets updated too on the screen but idk
+    const id = req.params.id;
+    // TODO this id might be the post id! not user id
 }
 
 // Function to handle avatar generation and serving
@@ -253,6 +296,9 @@ function handleAvatar(req, res) {
 // Function to get the current user from session
 function getCurrentUser(req) {
     // TODO: Return the user object if the session user ID matches
+
+    // TODO check session user ID
+    return currUser;
 }
 
 // Function to get all posts, sorted by latest first

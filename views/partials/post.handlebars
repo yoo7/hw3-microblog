@@ -13,18 +13,37 @@
     </div>
 </div>
 <script>
+    // TODO need to add eventListeners??
 
     function handleLikeClick(event) {
-        const postId = event.target.getAttribute('data-id');
+        event.preventDefault();
+        const postId = event.target.getAttribute("data-id");
 
-        // you might want to "fetch" something...        
+        // you might want to "fetch" something...   
+        fetch("/like/" + postId, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "userAnswer=${encodeURIComponent(userAnswer)}"  // TODO not sure what to do for body (taken from tutorial)
+        })
+        .then(response => response.text())
+        .catch(error => console.error('Error:', error));     
     }
 
     function handleDeleteClick(event) {
         const buttonElement = event.target.closest('.delete-button');
         const postId = buttonElement.getAttribute('data-id');        
 
-        // you might want to "fetch" something...        
-        
+        // you might want to "fetch" something...   
+        fetch("/delete/" + postId, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "userAnswer=${encodeURIComponent(userAnswer)}"  // TODO not sure what to do for body (taken from tutorial)
+        })
+        .then(response => response.text())
+        .catch(error => console.error('Error:', error));    
     }    
 </script>
