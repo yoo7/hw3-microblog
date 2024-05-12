@@ -59,7 +59,21 @@ function toggleEmojiPanel() {
 
 
     if (container.style.display === 'block' && allEmojis.length == 0) {
-        // go "Fetch" you some emojis and show them off with displayEmojies
+        // TODO go "Fetch" you some emojis and show them off with displayEmojies
+
+        // TODO Later: use .config file or environment variables so we don't hard-code the API key?
+        const apiKey = "828c77b09984470071838f84685c16e107a613a5";
+        const url = "https://emoji-api.com/emojis?search=${input}&access_key=${apiKey}";
+
+        // Fetch emojis, turn the response into JSON, and display the toggle
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                displayEmojis(data);
+            })
+            .catch(error => {
+                console.error("Error fetching emojis: ", error);
+            });
     }
 }
 

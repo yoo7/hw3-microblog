@@ -99,18 +99,22 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 app.get("/", (req, res) => {
     const posts = getPosts();
     const user = getCurrentUser(req) || {};
+
+    // Use home.handlebars
     res.render("home", { posts, user });
 });
 
 // Register GET route is used for error response from registration
 //
 app.get("/register", (req, res) => {
+    // Error message is whatever the query string value is
     res.render("loginRegister", { regError: req.query.error });
 });
 
 // Login route GET route is used for error response from login
 //
 app.get("/login", (req, res) => {
+    // Error message is whatever the query string value is
     res.render("loginRegister", { loginError: req.query.error });
 });
 
@@ -135,7 +139,7 @@ app.post("/posts", (req, res) => {
     const user = currUser;  // TODO not sure about what to put for user?
 
     addPost(title, content, user);
-    res.redirect("home");
+    res.redirect("/");
 });
 app.post("/like/:id", (req, res) => {
     // TODO: Update post likes
@@ -143,6 +147,7 @@ app.post("/like/:id", (req, res) => {
 });
 app.get("/profile", isAuthenticated, (req, res) => {
     // TODO: Render profile page
+    // Using the middleware isAuthenticated, which executes before the actual route function
 });
 app.get("/avatar/:username", (req, res) => {
     // TODO: Serve the avatar image for the user
@@ -222,6 +227,7 @@ function addUser(username) {
     // TODO do we use the first unavailable ID number? Since you can delete users...
     const id = users[users.length - 1].id + 1;
 
+    // TODO not sure how to do the time
     users[users.length] = { id: id, username: username, avatar_url: undefined, memberSince: "2024-01-01 10:00" };
 }
 
@@ -230,8 +236,9 @@ function isAuthenticated(req, res, next) {
     console.log(req.session.userId);
 
     if (req.session.userId) {
+        // Finished processing info, so move on to the actual route function
         next();
-    } else {
+    } else {z
         res.redirect("/login");
     }
 }
@@ -243,11 +250,11 @@ function registerUser(req, res) {
     if (!user) {
         // Username doesn't exist, so we can register new user
         // TODO: Register a new user and redirect appropriately
-        res.redirect("home");
         addUser(req.body.username);
+        res.redirect("/");
     } else {
-        // User already exists
-        // TODO Error message
+        // User already exists, so redirect to /register GET endpoint with these parameters
+        res.redirect("/register?error=Username+already+exists");
     }    
 }
 
@@ -261,9 +268,9 @@ function loginUser(req, res) {
         currUser = user;
         res.redirect("home");
     } else {
-        // TODO make error message appear
+        // Redirect to the /login GET endpoint with these parameters
+        res.redirect("/login?error=Invalid+username");
     }
-    
 }
 
 // Function to logout a user
@@ -271,7 +278,7 @@ function logoutUser(req, res) {
     // TODO: Destroy session and redirect appropriately
 
     currUser = null;
-    res.redirect("/");
+    res.redirect("/"); 
 }
 
 // Function to render the profile page

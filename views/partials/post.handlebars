@@ -19,7 +19,7 @@
         event.preventDefault();
         const postId = event.target.getAttribute("data-id");
 
-        // you might want to "fetch" something...   
+        // TODO you might want to "fetch" something...   
         fetch("/like/" + postId, {
             method: "POST",
             headers: {
@@ -35,7 +35,7 @@
         const buttonElement = event.target.closest('.delete-button');
         const postId = buttonElement.getAttribute('data-id');        
 
-        // you might want to "fetch" something...   
+        // TODO you might want to "fetch" something...   
         fetch("/delete/" + postId, {
             method: "POST",
             headers: {
