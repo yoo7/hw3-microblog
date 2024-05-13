@@ -1,3 +1,5 @@
+"use strict";
+
 const express = require("express");
 const expressHandlebars = require("express-handlebars");
 const session = require("express-session");
@@ -99,9 +101,12 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 app.get("/", (req, res) => {
     const posts = getPosts();
     const user = getCurrentUser(req) || {};
+    //const loggedIn = res.locals.loggedIn;
+    //console.log(res.locals.loggedIn);
+    const loggedIn = true;
 
     // Use home.handlebars
-    res.render("home", { posts, user });
+    res.render("home", { posts, user, loggedIn });
 });
 
 // Register GET route is used for error response from registration
@@ -266,7 +271,8 @@ function loginUser(req, res) {
     if (user) {
         // Login user and redirect
         currUser = user;
-        res.redirect("home");
+        res.locals.loggedIn = true;  // TODO not sure if we're supposed modify like this
+        res.redirect("/");
     } else {
         // Redirect to the /login GET endpoint with these parameters
         res.redirect("/login?error=Invalid+username");
@@ -278,6 +284,7 @@ function logoutUser(req, res) {
     // TODO: Destroy session and redirect appropriately
 
     currUser = null;
+    res.locals.loggedIn = false;  // TODO not sure if we're supposed to modify like this
     res.redirect("/"); 
 }
 
