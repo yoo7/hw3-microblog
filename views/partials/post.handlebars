@@ -12,12 +12,13 @@
         </div>
     </div>
     <div class="post-content preserve-newlines">
-        {{post.title}}
-        {{post.content}}
+        <span>{{post.title}}</span>
+        <span>{{post.content}}</span>
         <!-- the post -->
         <div class="post-status-bar">
             {{post.timestamp}}
             {{post.likes}}
+            <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->
             <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
@@ -31,6 +32,7 @@
         event.preventDefault();
         const postId = event.target.getAttribute("data-id");
 
+        // TODO: Consider updatePostLikes() in server.js, which is called by app.post("/like/:id"...) thing
         // TODO you might want to "fetch" something...   
         fetch("/like/" + postId, {
             method: "POST",

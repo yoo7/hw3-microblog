@@ -293,6 +293,7 @@ function updatePostLikes(req, res) {
     // TODO if this post isn't the current user's, then get the post obj and increment likes
     // TODO hopefully the number gets updated too on the screen but idk
     const id = req.params.id;
+    res.send(id);  // TODO idk
     // TODO this id might be the post id! not user id
 }
 
