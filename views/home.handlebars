@@ -9,7 +9,9 @@
             <!-- make a header here -->
             <form action="/posts" method="POST">
                 <!-- title input field name = "title" -->
+                <input type="text" id="title" name="title" size="60" required=true placeholder="Title"/>
                 <!-- text area input field name = "content" -->
+                <textarea id="content" name="content" rows="20" cols="60" required=true placeholder="What's happening?"></textarea>
 
                 <div class="form-actions">
                     <button type="button" class="emoji-button" onclick="toggleEmojiPanel()">😀</button>
@@ -19,7 +21,11 @@
 
             <div id="emoji-container" class="emoji-panel" style="display: none;">
                 <!-- input field for the emoji search, use oninput="searchEmojis() -->
-                <!-- a div, id = "emoji-grid" -->
+                <input type="search" id="search" name="search" placeholder="Search for an emoji" oninput="searchEmojis()"/>
+                <!-- TODO a div, id = "emoji-grid" -->
+                <div id="emoji-grid">
+
+                </div>
             </div>
         </section>
     {{/if}}
@@ -52,6 +58,10 @@
 */
 
 let allEmojis = [];  // Global list to hold all emojis
+
+function test() {
+    alert("hello");
+}
 
 function toggleEmojiPanel() {
     const container = document.getElementById('emoji-container');

@@ -1,11 +1,23 @@
 {{! Partial for a single post }}
 <div class="post">
     <div class="post-avatar">
-        <!-- the user's avatar -->
+        <!-- TODO conditional rendering based on variables copied this code from main.handlebars-->
+        <img src="{{#if user.avatar_url}}
+                        {{user.avatar_url}}
+                    {{else}}
+                        /avatar/{{user.username}}
+                    {{/if}}" 
+                    alt="User Avatar" 
+                    class="header-avatar">
+        </div>
     </div>
     <div class="post-content preserve-newlines">
+        {{post.title}}
+        {{post.content}}
         <!-- the post -->
         <div class="post-status-bar">
+            {{post.timestamp}}
+            {{post.likes}}
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->
             <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->

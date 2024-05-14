@@ -86,7 +86,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.static("/public"));                 // Serve static files
+app.use(express.static("public"));                 // Serve static files
 app.use(express.urlencoded({ extended: true }));    // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.json());                            // Parse JSON bodies (as sent by API clients)
 
@@ -101,12 +101,9 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 app.get("/", (req, res) => {
     const posts = getPosts();
     const user = getCurrentUser(req) || {};
-    //const loggedIn = res.locals.loggedIn;
-    //console.log(res.locals.loggedIn);
-    const loggedIn = true;
 
     // Use home.handlebars
-    res.render("home", { posts, user, loggedIn });
+    res.render("home", { posts, user });
 });
 
 // Register GET route is used for error response from registration
@@ -177,9 +174,6 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
 
     if (id === currUser.id) {
         // They are the owner of this id
-        
-        // TODO I'm guessing you logout too
-        logoutUser(findUserById(id));
         // TODO actually delete
 
     } else {
@@ -243,7 +237,7 @@ function isAuthenticated(req, res, next) {
     if (req.session.userId) {
         // Finished processing info, so move on to the actual route function
         next();
-    } else {z
+    } else {
         res.redirect("/login");
     }
 }
@@ -253,8 +247,7 @@ function registerUser(req, res) {
     const user = findUserByUsername(req.body.username);
 
     if (!user) {
-        // Username doesn't exist, so we can register new user
-        // TODO: Register a new user and redirect appropriately
+        // Username doesn't exist, so we can register new user and redirect appropriately
         addUser(req.body.username);
         res.redirect("/");
     } else {
@@ -271,7 +264,7 @@ function loginUser(req, res) {
     if (user) {
         // Login user and redirect
         currUser = user;
-        res.locals.loggedIn = true;  // TODO not sure if we're supposed modify like this
+        req.session.loggedIn = true;
         res.redirect("/");
     } else {
         // Redirect to the /login GET endpoint with these parameters
@@ -282,9 +275,10 @@ function loginUser(req, res) {
 // Function to logout a user
 function logoutUser(req, res) {
     // TODO: Destroy session and redirect appropriately
+    // TODO what does it mean to "destroy" the session...
 
     currUser = null;
-    res.locals.loggedIn = false;  // TODO not sure if we're supposed to modify like this
+    req.session.loggedIn = false;
     res.redirect("/"); 
 }
 
@@ -323,6 +317,11 @@ function getPosts() {
 // Function to add a new post
 function addPost(title, content, user) {
     // TODO: Create a new post object and add to posts array
+    // TODO placeholder for now, need to fix
+
+    // TODO not sure how to do the time
+    posts[posts.length] =  { id: 3, title: title, content: content, username: user.username, timestamp: "2024-01-01 10:00", likes: 0 };
+
 }
 
 // Function to generate an image avatar
