@@ -86,7 +86,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.static("public"));                 // Serve static files
+app.use(express.static("public"));                  // Serve static files
 app.use(express.urlencoded({ extended: true }));    // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.json());                            // Parse JSON bodies (as sent by API clients)
 

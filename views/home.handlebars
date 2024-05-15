@@ -59,17 +59,13 @@
 
 let allEmojis = [];  // Global list to hold all emojis
 
-function test() {
-    alert("hello");
-}
-
 function toggleEmojiPanel() {
     const container = document.getElementById('emoji-container');
     container.style.display = container.style.display === 'none' ? 'block' : 'none';
 
 
-    if (container.style.display === 'block' && allEmojis.length == 0) {
-        // TODO go "Fetch" you some emojis and show them off with displayEmojies
+    if (container.style.display === 'block' && allEmojis.length === 0) {
+        // TODO go "Fetch" you some emojis and show them off with displayEmojis
 
         // TODO Later: use .config file or environment variables so we don't hard-code the API key?
         const apiKey = "828c77b09984470071838f84685c16e107a613a5";
@@ -104,6 +100,7 @@ function displayEmojis(emojis,limit=200) {
     }
 }
 
+/* TODO uncomment this later
 function searchEmojis() {
     const searchTerm = document.getElementById('emoji-search').value.toLowerCase();
     // array.filter takes a predicate
@@ -113,6 +110,7 @@ function searchEmojis() {
     
     displayEmojis(filteredEmojis);
 }
+*/
 
 function insertEmoji(emoji) {
     // put an emoji on a form somehow. 

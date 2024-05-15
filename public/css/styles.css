@@ -8,6 +8,19 @@ header {
     flex-direction: column;
 }
 
+nav ul li {
+    list-style: none;
+    padding: 3vw;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
 @media screen and (max-width: 750px) {
 
 }
