@@ -9,13 +9,14 @@
             <p style="color: red;">{{loginError}}</p>
         {{/if}}
         <form action="/login" method="POST">
-            <!-- the login form goes here -->   
-            <input name="username">     
-            <button type="submit">Login</button>
+            <!-- Following two lines from 5/15 lecture with Dr. Posnett -->
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" class="gaegu-regular">
+            <button type="submit" class="gaegu-regular">Login</button>
         </form>
     </section>
 
-    <!-- say --OR-- ... with style -->
+    <p class="or">&mdash; OR &mdash;</p>
 
     <section class = "register-area">
         <h2>Register</h2>
@@ -24,9 +25,10 @@
             <p style="color: red;">{{regError}}</p>
         {{/if}}
         <form action="/register" method="POST">
-            <!-- the registration form goes here -->
-            <input name="username">   
-            <button type="submit">Register</button>
+            <!-- Following two lines from 5/15 lecture with Dr. Posnett -->
+            <label for="new-username">Username:</label>
+            <input type="text" id="new-username" name="username" class="gaegu-regular">
+            <button type="submit" class="gaegu-regular">Register</button>
         </form>
     </section>
 </section>

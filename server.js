@@ -249,7 +249,7 @@ function registerUser(req, res) {
     if (!user) {
         // Username doesn't exist, so we can register new user and redirect appropriately
         addUser(req.body.username);
-        res.redirect("/");
+        res.redirect("/login");
     } else {
         // User already exists, so redirect to /register GET endpoint with these parameters
         res.redirect("/register?error=Username+already+exists");

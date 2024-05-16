@@ -1,16 +1,67 @@
+.gaegu-regular {
+    font-family: "Gaegu", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+  
+body {
+    margin: 0;
+}
+
 header {
     text-align: center;
-    background-color: #85c7c9;
+    background-color: #FFCC70;
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 50px;
+    height: 100px;
+}
+
+.logo {
+    display: flex;
+    align-content: center;
+    align-items: center;
+}
+
+h1 {
+    font-size: 60px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+label, input, textarea, .or, .title, nav, button {
+    font-size: 20px;
+}
+
+.content, footer {
+    font-size: 15px;
 }
 
 .post-form {
     display: flex;
     flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+nav {
+    display: flex;
+    align-content: center;
+    align-items: center;
 }
 
 nav ul li {
     list-style: none;
-    padding: 3vw;
+    padding: 5px 30px;
+}
+
+nav ul li a {
+    text-decoration: none;
 }
 
 nav ul {
@@ -21,6 +72,144 @@ nav ul {
     align-items: center;
 }
 
-@media screen and (max-width: 750px) {
+input {
+    width: 200px;
+}
 
+.post {
+    box-shadow: auto auto 5px;
+}
+
+
+.login-register {
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+.login-area, .register-area {
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+    padding: 10px;
+    flex-direction: column;
+}
+
+.or {
+    white-space: nowrap;
+}
+
+.login-register button, input {
+    border-radius: 3px;
+}
+
+button {
+    background-color: #22668D;
+    color: #FFFADD;
+    width: 100px;
+}
+
+button:hover {
+    background-color: #6aaaba;
+}
+
+footer {
+    text-align: center;
+    padding: 40px;
+    margin: 100px auto auto auto;
+    color: #FFCC70;
+    background-color: #2a343eee;
+}
+
+@media screen and (max-width: 850px) {
+    header {
+        padding: 0px 35px;
+        height: 70px;
+    }
+    
+    h1 {
+        font-size: 42px;
+    }
+    
+    h2 {
+        font-size: 21px;
+    }
+    
+    label, input, textarea, .or, .title, nav, button {
+        font-size: 16px;
+    }
+    
+    .content, footer {
+        font-size: 13px;
+    }
+    
+    nav ul li {
+        list-style: none;
+        padding: 3.5px 21px;
+    }
+    
+    nav ul li a {
+        text-decoration: none;
+    }
+    
+    nav ul {
+        display: flex;
+        justify-content: center;
+        justify-items: center;
+        align-content: center;
+        align-items: center;
+    }
+    
+    input {
+        width: 140px;
+    }
+
+    .post {
+        box-shadow: auto auto 3.5px;
+    }
+    
+    
+    .login-register {
+        flex-direction: column;
+    }
+    
+    .login-area, .register-area {
+        display: flex;
+        justify-content: center;
+        justify-items: center;
+        align-content: center;
+        align-items: center;
+        padding: 7px;
+        flex-direction: column;
+    }
+    
+    .or {
+        white-space: nowrap;
+    }
+    
+    .login-register button, input {
+        border-radius: 2px;
+    }
+    
+    button {
+        background-color: #22668D;
+        color: #FFFADD;
+        width: 70px;
+    }
+    
+    button:hover {
+        background-color: #6aaaba;
+    }
+    
+    footer {
+        text-align: center;
+        padding: 15px;
+        margin: 30px auto auto auto;
+        color: #FFCC70;
+        background-color: #2a343eee;
+    }
 }
