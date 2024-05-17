@@ -78,9 +78,9 @@ app.use(
 // should be used in your template files. 
 // 
 app.use((req, res, next) => {
-    res.locals.appName = "MicroBlog";
+    res.locals.appName = "Whiteboard";
     res.locals.copyrightYear = 2024;
-    res.locals.postNeoType = "Post";
+    res.locals.postNeoType = "Note";
     res.locals.loggedIn = req.session.loggedIn || false;
     res.locals.userId = req.session.userId || "";
     next();
@@ -196,12 +196,14 @@ app.listen(PORT, () => {
 
 // Example data for posts and users
 let posts = [
-    { id: 1, title: "Sample Post", content: "This is a sample post.", username: "SampleUser", timestamp: "2024-01-01 10:00", likes: 0 },
-    { id: 2, title: "Another Post", content: "This is another sample post.", username: "AnotherUser", timestamp: "2024-01-02 12:00", likes: 0 },
+    { id: 1, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "StudiousStudent", timestamp: "2024-05-12 1:04", likes: 0 },
+    { id: 2, title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "2024-01-02 12:00", likes: 0 },
+    { id: 3, title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "2024-03-24", likes: 0 },
 ];
 let users = [
-    { id: 1, username: "SampleUser", avatar_url: undefined, memberSince: "2024-01-01 08:00" },
-    { id: 2, username: "AnotherUser", avatar_url: undefined, memberSince: "2024-01-02 09:00" },
+    { id: 1, username: "StudiousStudent", avatar_url: undefined, memberSince: "2024-01-01 08:00" },
+    { id: 2, username: "whatsyelp", avatar_url: undefined, memberSince: "2024-01-02 09:00" },
+    { id: 3, username: "technologically-challenged", avatar_url: undefined, memberSince: "2024-02-03 10:00"},
 ];
 // TODO: add more posts and ids
 
@@ -332,8 +334,8 @@ function addPost(title, content, user) {
     // TODO: Create a new post object and add to posts array
     // TODO placeholder for now, need to fix
 
-    // TODO not sure how to do the time
-    posts[posts.length] =  { id: 3, title: title, content: content, username: user.username, timestamp: "2024-01-01 10:00", likes: 0 };
+    // TODO not sure how to do the time or the id
+    posts[posts.length] =  { id: 4, title: title, content: content, username: user.username, timestamp: "2024-01-01 10:00", likes: 0 };
 
 }
 

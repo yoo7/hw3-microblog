@@ -21,9 +21,9 @@
             </form>
 
             <div id="emoji-container" class="emoji-panel" style="display: none;">
-                <!-- input field for the emoji search, use oninput="searchEmojis() -->
+                <!-- input field for the emoji search -->
                 <input class="gaegu-regular" type="search" id="emoji-search" name="search" placeholder="Search for an emoji" oninput="searchEmojis()"/>
-                <!-- TODO a div, id = "emoji-grid" -->
+
                 <div id="emoji-grid">
 
                 </div>
@@ -33,7 +33,7 @@
 
     <section class="posts-list">
         <!-- recent posts -->
-        <h2 class="gaegu-regular">&mdash; Recent {{toLowerCase postNeoType}}s &mdash;</h2>
+        <h2 class="gaegu-regular">&mdash; Recent {{toLowerCase postNeoType}}s from {{postNeoType}}-Takers &mdash;</h2>
 
         {{#if posts.length}}
         <ul>
@@ -71,7 +71,7 @@ function toggleEmojiPanel() {
         const apiKey = "828c77b09984470071838f84685c16e107a613a5";
         const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
 
-        // Fetch emojis, turn the response into JSON, and display the toggle
+        // Fetch emojis, turn the response into JSON, update allEmojis, anddisplay the toggle
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -81,8 +81,6 @@ function toggleEmojiPanel() {
             .catch(error => {
                 console.error("Error fetching emojis: ", error);
             });
-        
-        
     }
 }
 
@@ -104,11 +102,12 @@ function displayEmojis(emojis,limit=200) {
     }
 }
 
+// Get the emojis whose names contain the substring searchTerm
 function searchEmojis() {
     const searchTerm = document.getElementById("emoji-search").value.toLowerCase();
-    // array.filter takes a predicate
-    // use string.includes. 
 
+    // Look through the array of JS objects -- for each object, check the "slug" attribute
+    // and see if that string contains the searchTerm
     const filteredEmojis = allEmojis.filter((obj) => obj.slug.includes(searchTerm));
     
     displayEmojis(filteredEmojis);
