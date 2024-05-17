@@ -138,7 +138,7 @@ app.post("/posts", (req, res) => {
     // TODO: Add a new post and redirect to home
     const title = req.body.title;
     const content = req.body.content;
-    const user = currUser;  // TODO not sure about what to put for user?
+    const user = req.session.userId;  // TODO not sure about what to put for user?
 
     addPost(title, content, user);
     res.redirect("/");
@@ -172,7 +172,7 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
     
     const id = req.params.id;
 
-    if (id === currUser.id) {
+    if (id === req.session.userId) {
         // They are the owner of this id
         // TODO actually delete
 
@@ -266,14 +266,14 @@ function loginUser(req, res) {
     // User exists
     if (user) {
         // Login user and redirect
-        currUser = user;
+        req.session.userId = user.id;
         req.session.loggedIn = true;
-        console.log("hi");
 
         if (user.avatar_url === undefined) {
             handleAvatar(req, res);
             console.log(user.avatar_url);
         }
+
         res.redirect("/");
     } else {
         // Redirect to the /login GET endpoint with these parameters
@@ -282,13 +282,18 @@ function loginUser(req, res) {
 }
 
 // Function to logout a user
+// Code from 5/17 lecture from Dr. Posnett
 function logoutUser(req, res) {
-    // TODO: Destroy session and redirect appropriately
-    // TODO what does it mean to "destroy" the session...
-
-    currUser = null;
-    req.session.loggedIn = false;
-    res.redirect("/"); 
+    // Destroy session and redirect appropriately
+    req.session.destroy(err => {
+        if (err) {
+            console.error("Error destroying session:", err);
+            res.redirect("/error");
+        } else {
+            // Successful logout
+            res.redirect("/");
+        }
+    });
 }
 
 // Function to render the profile page
@@ -321,7 +326,7 @@ function getCurrentUser(req) {
     // TODO: Return the user object if the session user ID matches
 
     // TODO check session user ID
-    return currUser;
+    return req.session.userId;
 }
 
 // Function to get all posts, sorted by latest first
