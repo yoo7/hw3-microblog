@@ -249,6 +249,7 @@ function registerUser(req, res) {
     if (!user) {
         // Username doesn't exist, so we can register new user and redirect appropriately
         addUser(req.body.username);
+        handleAvatar(req, res);
         res.redirect("/login");
     } else {
         // User already exists, so redirect to /register GET endpoint with these parameters
@@ -265,6 +266,12 @@ function loginUser(req, res) {
         // Login user and redirect
         currUser = user;
         req.session.loggedIn = true;
+        console.log("hi");
+
+        if (user.avatar_url === undefined) {
+            handleAvatar(req, res);
+            console.log(user.avatar_url);
+        }
         res.redirect("/");
     } else {
         // Redirect to the /login GET endpoint with these parameters
@@ -297,9 +304,14 @@ function updatePostLikes(req, res) {
     // TODO this id might be the post id! not user id
 }
 
-// Function to handle avatar generation and serving
+// Function to handle avatar generation and serving the user's avatar image
 function handleAvatar(req, res) {
-    // TODO: Generate and serve the user"s avatar image
+    const username = req.body.username;
+    const user = findUserByUsername(username);
+    
+    user.avatar_url = generateAvatar(req.body.username[0]);
+    console.log("username:", username);
+    console.log("avatar_url:", user.avatar_url);
 }
 
 // Function to get the current user from session
@@ -326,34 +338,25 @@ function addPost(title, content, user) {
 }
 
 // Function to generate an image avatar
+// Reference: https://blog.logrocket.com/creating-saving-images-node-canvas/
+// and https://flaviocopes.com/canvas-node-generate-image/
 function generateAvatar(letter, width = 100, height = 100) {
-    // TODO: Choose a color scheme based on the letter
+    // 1. Choose a color scheme based on the letter
     const color = "#FF927A";  // TODO: placeholder
     
-    // Create a canvas with specified dimensions
-    const canvas = createCanvas(width, height);
+    // 2. Create a canvas with specified dimensions
+    const canvasImg = canvas.createCanvas(width, height);
     // Get a CanvasRenderingContext2D object
-    const context = canvas.getContent("2d");
+    const context = canvasImg.getContext("2d");
     
 
-    // Fill the entire rectangle (starting at (0, 0)) with the given color
+    // 3. Fill the entire rectangle (starting at (0, 0)) with the given color
     context.fillStyle = color;
     context.fillRect(0, 0, width, height);
 
-    // Draw the letter in the center
+    // 4. Draw the letter in the center
     context.fillText(letter, width / 2, height / 2);
 
-    // TODO: Return the avatar as a PNG buffer
-    // TODO used this https://blog.logrocket.com/creating-saving-images-node-canvas/ but have to check
-    const buffer = canvas.toBuffer("images/png");
-    fs.writeFileSync("./image.png", buffer);
-
-
-    // TODO: Generate an avatar image with a letter
-    // Steps:
-    // 1. Choose a color scheme based on the letter
-    // 2. Create a canvas with the specified width and height
-    // 3. Draw the background color
-    // 4. Draw the letter in the center
     // 5. Return the avatar as a PNG buffer
+    return canvasImg.toBuffer("images/png");
 }

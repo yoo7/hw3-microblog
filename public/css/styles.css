@@ -96,8 +96,14 @@ input {
     flex-direction: column;
 }
 
-.post-form input, textarea {
+.post-form input, textarea, #emoji-grid {
     width: 100%;
+}
+
+#emoji-grid {
+    height: 15em;
+    border: solid black;
+    border-width: thin;
 }
 
 .post-form textarea {
