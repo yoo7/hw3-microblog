@@ -9,15 +9,15 @@
                     {{/if}}" 
                     alt="User Avatar" 
                     class="header-avatar">
-        </div>
+        
+        <span class="title gaegu-class">{{this.title}}</span>
     </div>
     <div class="post-content preserve-newlines">
-        <span class="title gaegu-class">{{this.title}}</span>
         <span class="content gaegu-class">{{this.content}}</span>
         <!-- the post -->
         <div class="post-status-bar">
-            {{this.timestamp}}
             {{this.likes}}
+            Posted at {{this.timestamp}} by {{this.username}}
             <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->

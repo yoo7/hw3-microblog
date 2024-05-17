@@ -3,7 +3,11 @@
     font-weight: 400;
     font-style: normal;
 }
-  
+
+header, body, footer {
+    align-self: center;
+}
+
 body {
     margin: 0;
 }
@@ -15,6 +19,7 @@ header {
     justify-content: space-between;
     padding: 0px 50px;
     height: 100px;
+    margin: auto auto 50px auto;
 }
 
 .logo {
@@ -27,6 +32,11 @@ h1 {
     font-size: 60px;
 }
 
+.logo a {
+    text-decoration: none;
+    color: black;
+}
+
 h2 {
     font-size: 30px;
 }
@@ -36,14 +46,18 @@ label, input, textarea, .or, .title, nav, button {
 }
 
 .content, footer {
-    font-size: 15px;
+    font-size: 17px;
 }
 
-.post-form {
+.post-status-bar {
+    font-size: 13px;
+    align-self: flex-end;
+}
+
+.content-container {
     display: flex;
-    flex-direction: column;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-evenly;
     justify-items: center;
     align-content: center;
     align-items: center;
@@ -73,13 +87,56 @@ nav ul {
 }
 
 input {
-    width: 200px;
+    width: 150px;
+}
+
+.post-form {
+    width: 25em;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-form input, textarea {
+    width: 100%;
+}
+
+.post-form textarea {
+    height: 10em;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .post {
-    box-shadow: auto auto 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-self: center;
+    background-color: #FFFADD;
+    box-shadow: 10px 10px #8ECDDD;
+    width: 25em;
+    padding: 30px;
+    margin: auto auto 50px auto;
 }
 
+.posts-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+.posts-list ul {
+    padding-inline-start: 0px;
+}
+
+.title {
+    margin: auto auto auto 15px;
+}
 
 .login-register {
     display: flex;
@@ -101,6 +158,7 @@ input {
 
 .or {
     white-space: nowrap;
+    margin: 50px;
 }
 
 .login-register button, input {
@@ -120,15 +178,16 @@ button:hover {
 footer {
     text-align: center;
     padding: 40px;
-    margin: 100px auto auto auto;
+    margin: 50px auto auto auto;
     color: #FFCC70;
     background-color: #2a343eee;
 }
 
-@media screen and (max-width: 850px) {
+@media screen and (max-width: 975px) {
     header {
         padding: 0px 35px;
         height: 70px;
+        margin: auto auto 30px auto;
     }
     
     h1 {
@@ -136,15 +195,15 @@ footer {
     }
     
     h2 {
-        font-size: 21px;
+        font-size: 30px;
     }
     
     label, input, textarea, .or, .title, nav, button {
-        font-size: 16px;
+        font-size: 20px;
     }
     
     .content, footer {
-        font-size: 13px;
+        font-size: 15px;
     }
     
     nav ul li {
@@ -170,9 +229,21 @@ footer {
 
     .post {
         box-shadow: auto auto 3.5px;
+        width: 15em;
+    }
+
+    .content-container {
+        flex-direction: column;
+    }
+
+    .post-form {
+        margin: 20px auto 20px auto;
     }
     
-    
+    .posts-list ul {
+        margin: 20px;
+    }
+
     .login-register {
         flex-direction: column;
     }
@@ -198,7 +269,7 @@ footer {
     button {
         background-color: #22668D;
         color: #FFFADD;
-        width: 70px;
+        width: 100px;
     }
     
     button:hover {
@@ -207,7 +278,7 @@ footer {
     
     footer {
         text-align: center;
-        padding: 15px;
+        padding: 30px;
         margin: 30px auto auto auto;
         color: #FFCC70;
         background-color: #2a343eee;
