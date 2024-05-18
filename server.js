@@ -5,6 +5,7 @@ const expressHandlebars = require("express-handlebars");
 const session = require("express-session");
 const canvas = require("canvas");
 const fs = require("fs");
+const path = require("path");
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Configuration and Setup
@@ -134,19 +135,21 @@ app.get("/post/:id", (req, res) => {
     const id = req.params.id;
 });
 app.post("/posts", (req, res) => {
+    // Add new post and redirect to home
     // Corresponds with the code that uses the form method in home.handlebars
-    // TODO: Add a new post and redirect to home
     const title = req.body.title;
     const content = req.body.content;
-    const user = req.session.userId;  // TODO not sure about what to put for user?
+    const user = findUserById(req.session.userId);  // TODO not sure about what to put for user?
 
     addPost(title, content, user);
     res.redirect("/");
 });
+
 app.post("/like/:id", (req, res) => {
     // TODO: Update post likes
     updatePostLikes(req, res);
 });
+
 app.get("/profile", isAuthenticated, (req, res) => {
     // TODO: Render profile page
     // Using the middleware isAuthenticated, which executes before the actual route function
@@ -155,7 +158,7 @@ app.get("/avatar/:username", (req, res) => {
     // TODO: Serve the avatar image for the user
 });
 app.post("/register", (req, res) => {
-    // TODO: Register a new user
+    // Register a new user
     registerUser(req, res);  // TODO we just put here I guess?
 });
 app.post("/login", (req, res) => {
@@ -196,14 +199,14 @@ app.listen(PORT, () => {
 
 // Example data for posts and users
 let posts = [
-    { id: 1, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "StudiousStudent", timestamp: "2024-05-12 1:04", likes: 0 },
-    { id: 2, title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "2024-01-02 12:00", likes: 0 },
-    { id: 3, title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "2024-03-24", likes: 0 },
+    { id: 1, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "5/12/2024, 1:04 AM", likes: 0 },
+    { id: 2, title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0 },
+    { id: 3, title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0 },
 ];
 let users = [
-    { id: 1, username: "StudiousStudent", avatar_url: undefined, memberSince: "2024-01-01 08:00" },
-    { id: 2, username: "whatsyelp", avatar_url: undefined, memberSince: "2024-01-02 09:00" },
-    { id: 3, username: "technologically-challenged", avatar_url: undefined, memberSince: "2024-02-03 10:00"},
+    { id: 1, username: "SuperStudious", avatar_url: undefined, memberSince: "3/2/2024, 3:12 PM" },
+    { id: 2, username: "whatsyelp", avatar_url: undefined, memberSince: "12/17/2023, 10:11 AM" },
+    { id: 3, username: "technologically-challenged", avatar_url: undefined, memberSince: "2/3/2024, 8:34 PM" },
 ];
 // TODO: add more posts and ids
 
@@ -222,14 +225,19 @@ function findUserById(userId) {
     return users.find(user => user.id === userId);
 }
 
+function getCurrTime() {
+    const date = new Date();
+    return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
+}
 // Function to add a new user
 function addUser(username) {
     // Add new user object to the users array
     // TODO do we use the first unavailable ID number? Since you can delete users...
     const id = users[users.length - 1].id + 1;
+   
 
     // TODO not sure how to do the time
-    users[users.length] = { id: id, username: username, avatar_url: undefined, memberSince: "2024-01-01 10:00" };
+    users[users.length] = { id: id, username: username, avatar_url: undefined, memberSince: getCurrTime() };
 }
 
 // Middleware to check if user is authenticated
@@ -268,11 +276,6 @@ function loginUser(req, res) {
         // Login user and redirect
         req.session.userId = user.id;
         req.session.loggedIn = true;
-
-        if (user.avatar_url === undefined) {
-            handleAvatar(req, res);
-            console.log(user.avatar_url);
-        }
 
         res.redirect("/");
     } else {
@@ -315,10 +318,16 @@ function updatePostLikes(req, res) {
 function handleAvatar(req, res) {
     const username = req.body.username;
     const user = findUserByUsername(username);
-    
-    user.avatar_url = generateAvatar(req.body.username[0]);
+
     console.log("username:", username);
-    console.log("avatar_url:", user.avatar_url);
+
+    if (username) {
+        console.log("let's generate an avatar!");
+        const buffer = generateAvatar(username[0]);
+        const url = `public/avatar/${username}`;
+        user.avatar_url = `/avatar/${username}`;
+        fs.writeFileSync(url, buffer);
+    }
 }
 
 // Function to get the current user from session
@@ -326,7 +335,7 @@ function getCurrentUser(req) {
     // TODO: Return the user object if the session user ID matches
 
     // TODO check session user ID
-    return req.session.userId;
+    return findUserById(req.session.userId);
 }
 
 // Function to get all posts, sorted by latest first
@@ -340,30 +349,47 @@ function addPost(title, content, user) {
     // TODO placeholder for now, need to fix
 
     // TODO not sure how to do the time or the id
-    posts[posts.length] =  { id: 4, title: title, content: content, username: user.username, timestamp: "2024-01-01 10:00", likes: 0 };
-
+    posts[posts.length] =  { id: 4, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
 }
 
 // Function to generate an image avatar
 // Reference: https://blog.logrocket.com/creating-saving-images-node-canvas/
 // and https://flaviocopes.com/canvas-node-generate-image/
-function generateAvatar(letter, width = 100, height = 100) {
-    // 1. Choose a color scheme based on the letter
-    const color = "#FF927A";  // TODO: placeholder
+function generateAvatar(letter, width = 100, height = 100) {  
+    const fontPath = path.join(__dirname, "/public/Gaegu/Gaegu-Regular.ttf");
+    canvas.registerFont(fontPath, { family: "Gaegu", weight: "400", style: "normal"});
     
+    // 1. Choose a color scheme based on the letter
+    // There are 16777216 possible RGB color variations (pick from 0 to 16777215)
+    // toString(16) gives hex value
+    const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+        
     // 2. Create a canvas with specified dimensions
     const canvasImg = canvas.createCanvas(width, height);
+
     // Get a CanvasRenderingContext2D object
     const context = canvasImg.getContext("2d");
-    
 
     // 3. Fill the entire rectangle (starting at (0, 0)) with the given color
     context.fillStyle = color;
     context.fillRect(0, 0, width, height);
 
     // 4. Draw the letter in the center
-    context.fillText(letter, width / 2, height / 2);
+    context.font = "80px 'Gaegu' sans-serif";
+    const textHeight = context.measureText(letter).emHeightAscent;
+
+    let useHeight = textHeight / 4;
+
+    if (letter === letter.toUpperCase()) {
+        useHeight = parseInt(context.font) / 4;
+    }
+
+    context.textAlign = "center";
+    context.textBaseLine = "middle";
+    context.fillStyle = "white";
+
+    context.fillText(letter, width / 2, height / 2 + useHeight);
 
     // 5. Return the avatar as a PNG buffer
-    return canvasImg.toBuffer("images/png");
+    return canvasImg.toBuffer("image/png");
 }

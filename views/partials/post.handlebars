@@ -2,10 +2,10 @@
 <div class="post">
     <div class="post-avatar">
         <!-- TODO conditional rendering based on variables copied this code from main.handlebars-->
-        <img src="{{#if user.avatar_url}}
-                        {{user.avatar_url}}
+        <img src="{{#if this.avatar_url}}
+                        {{this.avatar_url}}
                     {{else}}
-                        /avatar/{{user.username}}
+                        /avatar/{{this.username}}
                     {{/if}}" 
                     alt="User Avatar" 
                     class="header-avatar">
@@ -17,7 +17,7 @@
         <!-- the post -->
         <div class="post-status-bar">
             {{this.likes}}
-            Stuck on the board at {{this.timestamp}} by {{this.username}}
+            Noted at {{this.timestamp}} by {{this.username}}
             <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->
