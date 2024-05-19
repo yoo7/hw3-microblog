@@ -132,6 +132,7 @@ app.get("/error", (req, res) => {
 
 app.get("/post/:id", (req, res) => {
     // TODO: Render post detail page
+    console.log("get");
     const id = req.params.id;
 });
 app.post("/posts", (req, res) => {
@@ -231,6 +232,12 @@ function findPostsByUser(username) {
     return posts.filter((post) => post.username === username);
 }
 
+function findPostById(postId) {
+    // Turn the id from string to number
+    const id = parseInt(postId);
+    return posts.find(post => post.id === id);
+}
+
 function getCurrTime() {
     const date = new Date();
     return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
@@ -316,18 +323,22 @@ function renderProfile(req, res) {
 
 // Function to update post likes
 function updatePostLikes(req, res) {
+    console.log("in here!");
     // TODO: Increment post likes if conditions are met
+    // TODO decrement likes if liked already (not sure how to make it remember if liked already tho?)
 
     // TODO if this post isn't the current user's, then get the post obj and increment likes
     // TODO hopefully the number gets updated too on the screen but idk
     const postId = req.params.id;
+
+    console.log("updatePostLikes: postId", postId);
     const post = findPostById(postId);
+    console.log("post", post);
 
     if (findUserByUsername(post.username) !== req.session.userId) {
         // User is liking a post that isn't theirs
         post.likes++;
-        console.log("new likes:", post.likes);
-        res.send(post.likes);
+        res.send("" + post.likes);
     }
 }
 

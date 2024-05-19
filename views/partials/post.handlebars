@@ -18,7 +18,7 @@
         <div class="post-status-bar">
            <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
             <div class="likes">
-                <button type="button" class="heart" onclick="handleLikeClick(event)">♡</button>
+                <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♡</button>
                 <div class="num-likes">
                     {{this.likes}}
                 </div>
@@ -36,9 +36,9 @@
 
     function handleLikeClick(event) {
         event.preventDefault();
-        console.log("Hello!!!!");
 
         const postId = event.target.getAttribute("data-id");
+        console.log("postId", postId);
 
         event.target.textContent = event.target.textContent === "♡" ? "♥" : "♡";
 
@@ -51,15 +51,16 @@
             },
             body: "id=${encodeURIComponent(postId)}"  // TODO not sure what to do for body (taken from tutorial)
         })
-        .then(res => event.target.nextElementSibling.textContent = res)
-        .catch(error => console.error('Error:', error));     
+        .then(res => res.text())
+        .then(text => event.target.nextElementSibling.textContent = parseInt(text))
+        .catch(error => console.error("Error:", error));     
         // TODO need to check someone is actually signed in...also would have to rmemember which posts they liked??
         // TODO so maybe another handlebar helper to determine which to display...
     }
 
     function handleDeleteClick(event) {
-        const buttonElement = event.target.closest('.delete-button');
-        const postId = buttonElement.getAttribute('data-id');        
+        const buttonElement = event.target.closest(".delete-button");
+        const postId = buttonElement.getAttribute("data-id");        
 
         // TODO you might want to "fetch" something...   
         fetch("/delete/" + postId, {

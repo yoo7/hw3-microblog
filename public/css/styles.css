@@ -44,6 +44,7 @@ h1 {
 
 h2 {
     font-size: 30px;
+    text-align: center;
 }
 
 label, input, textarea, .or, .title, nav, button {
