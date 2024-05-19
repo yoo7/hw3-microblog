@@ -26,7 +26,7 @@
                 </div>
             {{else}}
                 <div class="likes">
-                    <button type="button" class="heart" onclick="handleLikeClick(event)">♡</button>
+                    <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♡</button>
                     <div class="num-likes">
                         <p>{{this.likes}} likes</p>
                     </div>
@@ -62,7 +62,7 @@
             body: "id=${encodeURIComponent(postId)}"  // TODO not sure what to do for body (taken from tutorial)
         })
         .then(res => res.text())
-        .then(text => event.target.nextElementSibling.textContent = parseInt(text))
+        .then(text => event.target.nextElementSibling.textContent = parseInt(text) + " likes")
         .catch(error => console.error("Error:", error));     
         // TODO need to check someone is actually signed in...also would have to rmemember which posts they liked??
         // TODO so maybe another handlebar helper to determine which to display...
