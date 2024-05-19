@@ -17,12 +17,22 @@
         <!-- the post -->
         <div class="post-status-bar">
            <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
-            <div class="likes">
-                <button type="button" class="heart" onclick="handleLikeClick(event)">♡</button>
-                <div class="num-likes">
-                    {{this.likes}}
+            {{#ifCond this.username user.username}}
+                <div class="likes">
+                    <button type="button" class="trash" onclick="handleDeleteClick(event)">🗑️</button>
+                    <div class="num-likes">
+                        <p>{{this.likes}} likes</p>
+                    </div>
                 </div>
-            </div>
+            {{else}}
+                <div class="likes">
+                    <button type="button" class="heart" onclick="handleLikeClick(event)">♡</button>
+                    <div class="num-likes">
+                        <p>{{this.likes}} likes</p>
+                    </div>
+                </div>
+            {{/ifCond}}
+            
 
             <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
 
