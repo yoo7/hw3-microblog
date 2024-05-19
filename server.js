@@ -146,7 +146,7 @@ app.post("/posts", (req, res) => {
 });
 
 app.post("/like/:id", (req, res) => {
-    // TODO: Update post likes
+    // Update post likes
     updatePostLikes(req, res);
 });
 
@@ -162,7 +162,7 @@ app.post("/register", (req, res) => {
     registerUser(req, res);  // TODO we just put here I guess?
 });
 app.post("/login", (req, res) => {
-    // TODO: Login a user
+    // Login a user
     loginUser(req, res);
 });
 app.get("/logout", (req, res) => {
@@ -177,7 +177,7 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
 
     if (id === req.session.userId) {
         // They are the owner of this id
-        // TODO actually delete
+        // TODO actually delete the post
 
     } else {
         // They're not the owner
@@ -199,14 +199,14 @@ app.listen(PORT, () => {
 
 // Example data for posts and users
 let posts = [
-    { id: 1, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "5/12/2024, 1:04 AM", likes: 0 },
-    { id: 2, title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0 },
-    { id: 3, title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0 },
+    { id: 1, title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0 },
+    { id: 2, title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0 },
+    { id: 3, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "5/12/2024, 1:04 AM", likes: 0 },
 ];
 let users = [
-    { id: 1, username: "SuperStudious", avatar_url: undefined, memberSince: "3/2/2024, 3:12 PM" },
-    { id: 2, username: "whatsyelp", avatar_url: undefined, memberSince: "12/17/2023, 10:11 AM" },
-    { id: 3, username: "technologically-challenged", avatar_url: undefined, memberSince: "2/3/2024, 8:34 PM" },
+    { id: 1, username: "whatsyelp", avatar_url: undefined, memberSince: "12/17/2023, 10:11 AM" },
+    { id: 2, username: "technologically-challenged", avatar_url: undefined, memberSince: "2/3/2024, 8:34 PM" },
+    { id: 3, username: "SuperStudious", avatar_url: undefined, memberSince: "3/2/2024, 3:12 PM" },
 ];
 // TODO: add more posts and ids
 
@@ -223,6 +223,11 @@ function findUserByUsername(username) {
 function findUserById(userId) {
     // Return user object if found, otherwise return undefined
     return users.find(user => user.id === userId);
+}
+
+// Function to find post by user ID
+function findPostById(postId) {
+    return posts.find(post => post.id === postId);
 }
 
 function getCurrTime() {
@@ -307,11 +312,18 @@ function renderProfile(req, res) {
 // Function to update post likes
 function updatePostLikes(req, res) {
     // TODO: Increment post likes if conditions are met
+
     // TODO if this post isn't the current user's, then get the post obj and increment likes
     // TODO hopefully the number gets updated too on the screen but idk
-    const id = req.params.id;
-    res.send(id);  // TODO idk
-    // TODO this id might be the post id! not user id
+    const postId = req.params.id;
+    const post = findPostById(postId);
+
+    if (findUserByUsername(post.username) !== req.session.userId) {
+        // User is liking a post that isn't theirs
+        post.likes++;
+        console.log("new likes:", post.likes);
+        res.send(post.likes);
+    }
 }
 
 // Function to handle avatar generation and serving the user's avatar image
@@ -349,6 +361,7 @@ function addPost(title, content, user) {
     // TODO placeholder for now, need to fix
 
     // TODO not sure how to do the time or the id
+    // TODO maybe do the findpostById and increment
     posts[posts.length] =  { id: 4, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
 }
 

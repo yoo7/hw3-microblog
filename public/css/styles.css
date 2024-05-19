@@ -68,6 +68,24 @@ label, input, textarea, .or, .title, nav, button {
     flex-direction: column;
 }
 
+.likes {
+    display: flex;
+}
+
+.heart {
+    margin: auto 5px auto auto;
+    border: none;
+    background-color: transparent;
+    color: black;
+    width: auto;
+    height: auto;
+}
+
+.heart:hover {
+    background-color: transparent;
+    color: black;
+}
+
 .timestamp {
     display: flex;
     justify-self: flex-end;

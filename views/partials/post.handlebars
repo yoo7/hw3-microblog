@@ -16,23 +16,31 @@
         <span class="content gaegu-class">{{this.content}}</span>
         <!-- the post -->
         <div class="post-status-bar">
-            <div class="likes">{{this.likes}}</div>
+           <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
+            <div class="likes">
+                <button type="button" class="heart" onclick="handleLikeClick(event)">♡</button>
+                <div class="num-likes">
+                    {{this.likes}}
+                </div>
+            </div>
+
+            <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
 
             <div class="timestamp">Noted at {{this.timestamp}} by {{this.username}}</div>
-            
-            <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
-            <!-- everything that is shown in the status bar -->
-            <!-- Heart = ♥ -->
-            <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
         </div>        
     </div>
 </div>
 <script>
+
     // TODO need to add eventListeners??
 
     function handleLikeClick(event) {
         event.preventDefault();
+        console.log("Hello!!!!");
+
         const postId = event.target.getAttribute("data-id");
+
+        event.target.textContent = event.target.textContent === "♡" ? "♥" : "♡";
 
         // TODO: Consider updatePostLikes() in server.js, which is called by app.post("/like/:id"...) thing
         // TODO you might want to "fetch" something...   
@@ -41,10 +49,12 @@
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: "userAnswer=${encodeURIComponent(userAnswer)}"  // TODO not sure what to do for body (taken from tutorial)
+            body: "id=${encodeURIComponent(postId)}"  // TODO not sure what to do for body (taken from tutorial)
         })
-        .then(response => response.text())
+        .then(res => event.target.nextElementSibling.textContent = res)
         .catch(error => console.error('Error:', error));     
+        // TODO need to check someone is actually signed in...also would have to rmemember which posts they liked??
+        // TODO so maybe another handlebar helper to determine which to display...
     }
 
     function handleDeleteClick(event) {
