@@ -55,8 +55,22 @@ label, input, textarea, .or, .title, nav, button {
 }
 
 .post-status-bar {
+    display: grid;
     font-size: 13px;
-    align-self: flex-end;
+    align-items: center;
+    justify-content: space-between;
+    grid-template-columns: 1fr 70fr;
+    align-content: center;
+}
+
+.post-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.timestamp {
+    display: flex;
+    justify-self: flex-end;
 }
 
 .content-container {
@@ -257,6 +271,14 @@ footer {
 
     .content-container {
         flex-direction: column;
+    }
+
+    .timestsamp {
+        text-align: right;
+    }
+
+    .post-status-bar {
+        grid-template-columns: 1fr 1.5fr;
     }
 
     .post-form {

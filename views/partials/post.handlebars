@@ -16,8 +16,10 @@
         <span class="content gaegu-class">{{this.content}}</span>
         <!-- the post -->
         <div class="post-status-bar">
-            {{this.likes}}
-            Noted at {{this.timestamp}} by {{this.username}}
+            <div class="likes">{{this.likes}}</div>
+
+            <div class="timestamp">Noted at {{this.timestamp}} by {{this.username}}</div>
+            
             <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->
