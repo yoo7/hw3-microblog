@@ -16,14 +16,15 @@
     <h2>Your {{{postNeoType}}}s</h2>
     
     <!-- you'll need to make this conditaionl and #each expression work -->
-    {{#if user.posts.length}}
+    {{#if posts.length}}
         <ul>
-            {{#each user.posts}}
-                {{> post this}}
+            {{#each posts}}
+                <!-- you have to pass the user in to posts and this is the syntax -->
+                {{> post this user=../user}}            
             {{/each}}
         </ul>
-    {{else}}
-        <!-- fix this up with some helper functions and other handlebars expressions, or add you own character -->
-        <p>You have not posted yet, {{postNeoType}}-Taker.</p>
-    {{/if}}
+        {{else}}
+            <!-- fix this up with some helper functions and other handlebars expressions, or add you own character -->
+            <p>You have not posted yet, {{postNeoType}}-Taker.</p>
+        {{/if}}
 </section>
