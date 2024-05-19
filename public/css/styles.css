@@ -60,7 +60,7 @@ label, input, textarea, .or, .title, nav, button {
     font-size: 13px;
     align-items: center;
     justify-content: space-between;
-    grid-template-columns: 1fr 70fr;
+    grid-template-columns: 1fr 5.2fr;
     align-content: center;
 }
 
@@ -73,18 +73,19 @@ label, input, textarea, .or, .title, nav, button {
     display: flex;
 }
 
-.heart {
-    margin: auto 5px auto auto;
+.heart, .trash {
+    margin: auto 25px auto auto;
     border: none;
     background-color: transparent;
     color: black;
-    width: auto;
+    width: 5px;
     height: auto;
 }
 
-.heart:hover {
+.heart:hover, .trash:hover {
     background-color: transparent;
     color: black;
+    cursor: pointer;
 }
 
 .timestamp {

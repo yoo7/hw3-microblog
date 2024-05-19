@@ -19,7 +19,7 @@
            <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
             {{#ifCond this.username user.username}}
                 <div class="likes">
-                    <button type="button" class="trash" onclick="handleDeleteClick(event)">🗑️</button>
+                    <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
                     <div class="num-likes">
                         <p>{{this.likes}} likes</p>
                     </div>
@@ -48,12 +48,8 @@
         event.preventDefault();
 
         const postId = event.target.getAttribute("data-id");
-        console.log("postId", postId);
-
         event.target.textContent = event.target.textContent === "♡" ? "♥" : "♡";
-
-        // TODO: Consider updatePostLikes() in server.js, which is called by app.post("/like/:id"...) thing
-        // TODO you might want to "fetch" something...   
+  
         fetch("/like/" + postId, {
             method: "POST",
             headers: {
