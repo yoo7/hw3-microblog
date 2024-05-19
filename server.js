@@ -153,6 +153,7 @@ app.post("/like/:id", (req, res) => {
 app.get("/profile", isAuthenticated, (req, res) => {
     // TODO: Render profile page
     // Using the middleware isAuthenticated, which executes before the actual route function
+    renderProfile(req, res);
 });
 app.get("/avatar/:username", (req, res) => {
     // TODO: Serve the avatar image for the user
@@ -225,9 +226,9 @@ function findUserById(userId) {
     return users.find(user => user.id === userId);
 }
 
-// Function to find post by user ID
-function findPostById(postId) {
-    return posts.find(post => post.id === postId);
+// Function to find posts by user ID
+function findPostsByUser(username) {
+    return posts.filter((post) => post.username === username);
 }
 
 function getCurrTime() {
@@ -307,6 +308,10 @@ function logoutUser(req, res) {
 // Function to render the profile page
 function renderProfile(req, res) {
     // TODO: Fetch user posts and render the profile page
+    const user = getCurrentUser(req);
+    const usersPosts = findPostsByUser(user.username).reverse();
+    
+    res.render("profile", {posts: usersPosts, user: user})
 }
 
 // Function to update post likes
