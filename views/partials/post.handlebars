@@ -1,7 +1,7 @@
 {{! Partial for a single post }}
 <div class="post">
     <div class="post-avatar">
-        <!-- TODO conditional rendering based on variables copied this code from main.handlebars-->
+        <!-- Conditional rendering based on variables copied this code from main.handlebars-->
         <img src="{{#if this.avatar_url}}
                         {{this.avatar_url}}
                     {{else}}
@@ -12,13 +12,13 @@
         
         <span class="title gaegu-class">{{this.title}}</span>
     </div>
-    <div class="post-content preserve-newlines">
+    <div class="post-content">
         <span class="content gaegu-class">{{this.content}}</span>
         <!-- the post -->
         <div class="post-status-bar">
-           <!-- TODO determine whether to show post + likes OR the trashcan depending on the user-->
+           <!-- Determine whether to show post + likes OR the trashcan depending on the user-->
             {{#ifCond this.username user.username}}
-                <div class="likes">
+                <div class="delete">
                     <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
                     <div class="num-likes">
                         <p>{{this.likes}} likes</p>

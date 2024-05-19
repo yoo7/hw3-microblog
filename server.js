@@ -132,7 +132,6 @@ app.get("/error", (req, res) => {
 
 app.get("/post/:id", (req, res) => {
     // TODO: Render post detail page
-    console.log("get");
     const id = req.params.id;
 });
 app.post("/posts", (req, res) => {
@@ -140,19 +139,16 @@ app.post("/posts", (req, res) => {
     // Corresponds with the code that uses the form method in home.handlebars
     const title = req.body.title;
     const content = req.body.content;
-    const user = findUserById(req.session.userId);  // TODO not sure about what to put for user?
+    const user = findUserById(req.session.userId);
 
     addPost(title, content, user);
     res.redirect("/");
 });
-
 app.post("/like/:id", (req, res) => {
     // Update post likes
     updatePostLikes(req, res);
 });
-
 app.get("/profile", isAuthenticated, (req, res) => {
-    // TODO: Render profile page
     // Using the middleware isAuthenticated, which executes before the actual route function
     renderProfile(req, res);
 });
@@ -161,25 +157,30 @@ app.get("/avatar/:username", (req, res) => {
 });
 app.post("/register", (req, res) => {
     // Register a new user
-    registerUser(req, res);  // TODO we just put here I guess?
+    registerUser(req, res)
 });
 app.post("/login", (req, res) => {
     // Login a user
     loginUser(req, res);
 });
 app.get("/logout", (req, res) => {
-    // TODO: Logout the user
     logoutUser(req, res);
 });
 app.post("/delete/:id", isAuthenticated, (req, res) => {
     // TODO: Delete a post if the current user is the owner
-    // TODO does it automatically call isAuthenticated??
     
-    const id = req.params.id;
+    // TODO also get userId from req
+
+    // The :id route parameter
+    const postId = req.params.id;
+
+    // TODO loop through posts, find the matching postid, then check if the 
+        // TODO post writer is same as current writer. 
+        // TODO If so, actually delete the post by setting to posts[i] to undefined
 
     if (id === req.session.userId) {
         // They are the owner of this id
-        // TODO actually delete the post
+        
 
     } else {
         // They're not the owner
@@ -203,16 +204,13 @@ app.listen(PORT, () => {
 let posts = [
     { id: 1, title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0 },
     { id: 2, title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0 },
-    { id: 3, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "5/12/2024, 1:04 AM", likes: 0 },
+    { id: 3, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "4/29/2024, 1:04 AM", likes: 0 },
 ];
 let users = [
     { id: 1, username: "whatsyelp", avatar_url: undefined, memberSince: "12/17/2023, 10:11 AM" },
     { id: 2, username: "technologically-challenged", avatar_url: undefined, memberSince: "2/3/2024, 8:34 PM" },
     { id: 3, username: "SuperStudious", avatar_url: undefined, memberSince: "3/2/2024, 3:12 PM" },
 ];
-// TODO: add more posts and ids
-
-let currUser = null;
 
 // Function to find a user by username
 function findUserByUsername(username) {
@@ -232,6 +230,7 @@ function findPostsByUser(username) {
     return posts.filter((post) => post.username === username);
 }
 
+// Function to find a post by the postId
 function findPostById(postId) {
     // Turn the id from string to number
     const id = parseInt(postId);
@@ -242,14 +241,12 @@ function getCurrTime() {
     const date = new Date();
     return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
 }
-// Function to add a new user
-function addUser(username) {
-    // Add new user object to the users array
-    // TODO do we use the first unavailable ID number? Since you can delete users...
-    const id = users[users.length - 1].id + 1;
-   
 
-    // TODO not sure how to do the time
+// Function to add a new user to the users array
+function addUser(username) {
+    // Use first unavailable ID number
+    const id = users[users.length - 1].id + 1;
+
     users[users.length] = { id: id, username: username, avatar_url: undefined, memberSince: getCurrTime() };
 }
 
@@ -314,7 +311,7 @@ function logoutUser(req, res) {
 
 // Function to render the profile page
 function renderProfile(req, res) {
-    // TODO: Fetch user posts and render the profile page
+    // Fetch user posts and render the profile page
     const user = getCurrentUser(req);
     const usersPosts = findPostsByUser(user.username).reverse();
     
@@ -323,17 +320,13 @@ function renderProfile(req, res) {
 
 // Function to update post likes
 function updatePostLikes(req, res) {
-    console.log("in here!");
     // TODO: Increment post likes if conditions are met
     // TODO decrement likes if liked already (not sure how to make it remember if liked already tho?)
 
     // TODO if this post isn't the current user's, then get the post obj and increment likes
     // TODO hopefully the number gets updated too on the screen but idk
     const postId = req.params.id;
-
-    console.log("updatePostLikes: postId", postId);
     const post = findPostById(postId);
-    console.log("post", post);
 
     if (findUserByUsername(post.username) !== req.session.userId) {
         // User is liking a post that isn't theirs
@@ -347,12 +340,10 @@ function handleAvatar(req, res) {
     const username = req.body.username;
     const user = findUserByUsername(username);
 
-    console.log("username:", username);
-
     if (username) {
-        console.log("let's generate an avatar!");
         const buffer = generateAvatar(username[0]);
         const url = `public/avatar/${username}`;
+
         user.avatar_url = `/avatar/${username}`;
         fs.writeFileSync(url, buffer);
     }
@@ -373,18 +364,21 @@ function getPosts() {
 
 // Function to add a new post
 function addPost(title, content, user) {
-    // TODO: Create a new post object and add to posts array
-    // TODO placeholder for now, need to fix
-
-    // TODO not sure how to do the time or the id
-    // TODO maybe do the findpostById and increment
-    posts[posts.length] =  { id: 4, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
+    // Find the smallest id number that hasn't been taken and update the list
+    // If all ids are used, then add the post at posts[posts.length]
+    for (let i = 0; i <= posts.length; i++) {
+        if (posts[i] === undefined) {
+            posts[i] = { id: i, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
+            return;
+        }
+    }
 }
 
 // Function to generate an image avatar
 // Reference: https://blog.logrocket.com/creating-saving-images-node-canvas/
 // and https://flaviocopes.com/canvas-node-generate-image/
-function generateAvatar(letter, width = 100, height = 100) {  
+function generateAvatar(letter, width = 100, height = 100) {
+    // Write the letter with the same font we'll used in other parts of the site
     const fontPath = path.join(__dirname, "/public/Gaegu/Gaegu-Regular.ttf");
     canvas.registerFont(fontPath, { family: "Gaegu", weight: "400", style: "normal"});
     
@@ -407,6 +401,7 @@ function generateAvatar(letter, width = 100, height = 100) {
     context.font = "80px 'Gaegu' sans-serif";
     const textHeight = context.measureText(letter).emHeightAscent;
 
+    // Pick a certain height based on whether letter is uppercase or not (to help center the letter)
     let useHeight = textHeight / 4;
 
     if (letter === letter.toUpperCase()) {

@@ -59,9 +59,11 @@ label, input, textarea, .or, .title, nav, button {
     display: grid;
     font-size: 13px;
     align-items: center;
-    justify-content: space-between;
-    grid-template-columns: 1fr 5.2fr;
+    grid-template-columns: 1fr 30fr;
+    grid-template-rows: 30px;
     align-content: center;
+    justify-content: space-between;
+    justify-items: center;
 }
 
 .post-content {
@@ -69,17 +71,28 @@ label, input, textarea, .or, .title, nav, button {
     flex-direction: column;
 }
 
-.likes {
+.likes, .delete {
     display: flex;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+.num-likes {
+    white-space: nowrap;
 }
 
 .heart, .trash {
-    margin: auto 25px auto auto;
+    margin: auto 15px auto auto;
     border: none;
     background-color: transparent;
     color: black;
-    width: 5px;
-    height: auto;
+    font-size: 20px;
+}
+
+button.heart, button.trash {
+    width: 20px;
 }
 
 .heart:hover, .trash:hover {
