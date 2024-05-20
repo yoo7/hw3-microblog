@@ -170,19 +170,20 @@ app.get("/logout", (req, res) => {
 app.post("/delete/:id", isAuthenticated, (req, res) => {
     // TODO: Delete a post if the current user is the owner
     
-    // TODO also get userId from req
+    // Uses requesting post's username to crosscheck with current logged in user
+    const postOwner = req.params.username;
 
-    // The :id route parameter
+    // Also takes the postId from req
     const postId = req.params.id;
+    // const postToDelete = findPostById(postId);
 
-    // TODO loop through posts, find the matching postid, then check if the 
+    // TODO Find the matching postid, then check if the 
         // TODO post writer is same as current writer. 
-        // TODO If so, actually delete the post by setting to posts[i] to undefined
-
-    if (id === req.session.userId) {
+        // TODO If so, actually delete the post by splicing posts[id] out of array
+    if (postOwner === req.session.username) {
         // They are the owner of this id
-        
-
+        posts.splice(postId-1, 1);
+        res.redirect("/")
     } else {
         // They're not the owner
         // TODO Error message
