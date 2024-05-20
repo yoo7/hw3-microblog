@@ -74,8 +74,8 @@
     }
 
     function handleDeleteClick(event) {
-        const buttonElement = event.target.closest(".delete-button");
-        const postId = buttonElement.getAttribute("data-id");        
+        {{!-- const buttonElement = event.target.closest(".delete-button"); --}}
+        const postId = event.target.getAttribute("data-id");        
 
         // TODO you might want to "fetch" something...   
         fetch("/delete/" + postId, {
