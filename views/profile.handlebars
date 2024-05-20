@@ -1,13 +1,23 @@
 {{! Use the main layout }}
 {{!< main }}
 
-<div class="profile-container">
+<section class="profile">
+    <div class="profile-container">
     <div class="profile-avatar">
-        <!-- Correct path for the default avatar image -->
+        <!-- Conditional rendering based on variables copied this code from main.handlebars-->
+        <img src="{{#if user.avatar_url}}
+                        {{user.avatar_url}}
+                    {{else}}
+                        /images/{{user.username}}
+                    {{/if}}" 
+                    alt="User Avatar" 
+                    class="header-avatar">
+        
     </div>
     
     <section class="profile-info">
-        <!-- user profile info -->
+        <p><span class="bold gaegu-class">Username:</span> {{user.username}}</p>
+        <p><span class="bold gaegu-class">Member Since:</span> {{user.memberSince}}</p>
     </section>
 </div>
 
@@ -25,6 +35,7 @@
         </ul>
         {{else}}
             <!-- fix this up with some helper functions and other handlebars expressions, or add you own character -->
-            <p>You have not posted yet, {{postNeoType}}-Taker.</p>
+            <p>You have not posted yet, {{postNeoType}}-taker!</p>
         {{/if}}
+</section>
 </section>

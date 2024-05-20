@@ -5,12 +5,12 @@
         <img src="{{#if this.avatar_url}}
                         {{this.avatar_url}}
                     {{else}}
-                        /avatar/{{this.username}}
+                        /images/{{this.username}}
                     {{/if}}" 
                     alt="User Avatar" 
                     class="header-avatar">
         
-        <span class="title gaegu-class">{{this.title}}</span>
+        <span class="title gaegu-regular bold">{{this.title}}</span>
     </div>
     <div class="post-content">
         <span class="content gaegu-class">{{this.content}}</span>
@@ -62,7 +62,7 @@
             // User was logged in, so we got some # other than NaN
             // Allow the likes to actually get updated on the DOM
             if (!isNaN(numLikes)) {
-                event.target.nextElementSibling.textContent =  + " likes";
+                event.target.nextElementSibling.textContent = numLikes + " likes";
 
                 if (likeUp) {
                     // Like the post

@@ -8,6 +8,10 @@ header, body, footer {
     align-self: center;
 }
 
+p {
+    text-align: center;
+}
+
 body {
     margin: 0;
 }
@@ -31,6 +35,7 @@ header {
 
 .logo img {
     width: 50px;
+    margin: auto 15px auto auto;
 }
 
 h1 {
@@ -182,10 +187,16 @@ input {
     margin: auto auto 50px auto;
 }
 
-.post img, .user-info img {
+.post-avatar img, .user-info img {
     border-radius: 10px;
     width: 40px;
     height: auto;
+}
+
+.profile-avatar img {
+    border-radius: 10px;
+    height: auto;
+    width: 150px;
 }
 
 .post-avatar {
@@ -193,7 +204,7 @@ input {
     margin: auto auto 7px 0;
 }
 
-.posts-list {
+.posts-list, .user-posts {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -202,8 +213,39 @@ input {
     align-items: center;
 }
 
-.posts-list ul {
+.posts-list ul, .users-posts ul {
     padding-inline-start: 0px;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.profile {
+    display: flex;
+    justify-content: space-evenly;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+.profile-info {
+    margin: 0px auto 0px auto;
+    padding: 0px;
+    font-size: 20px;
+}
+
+.profile-info p {
+    margin: 12px;
 }
 
 .title {
@@ -241,6 +283,8 @@ button {
     background-color: #22668D;
     color: #FFFADD;
     width: 100px;
+    border-radius: 5px;
+    padding: 5px;
 }
 
 button:hover {
@@ -307,12 +351,12 @@ footer {
         flex-direction: column;
     }
 
-    .timestsamp {
-        text-align: right;
+    .timestamp {
+        margin: auto auto auto 22px;
     }
 
     .post-status-bar {
-        grid-template-columns: 1fr 1.5fr;
+        grid-template-columns: 1fr 3fr;
     }
 
     .post-form {
@@ -321,6 +365,14 @@ footer {
     
     .posts-list ul {
         margin: 20px;
+    }
+
+    .profile {
+        flex-direction: column;
+    }
+
+    .profile-avatar img {
+        width: 120px;
     }
 
     .login-register {

@@ -124,7 +124,9 @@ app.get("/login", (req, res) => {
 // Error route: render error page
 //
 app.get("/error", (req, res) => {
-    res.render("error");
+    const user = getCurrentUser(req);
+    
+    res.render("error", { user: user });
 });
 
 // Additional routes that you must implement
@@ -260,6 +262,7 @@ function isAuthenticated(req, res, next) {
         // Finished processing info, so move on to the actual route function
         next();
     } else {
+        console.log("Redirecting to login...");
         res.redirect("/login");
     }
 }
@@ -323,7 +326,6 @@ function renderProfile(req, res) {
 // Function to update post likes
 function updatePostLikes(req, res) {
     // Don't let user like the post if not logged in
-    console.log("session id:", req.session.userId);
     if (!req.session.userId) {
         res.redirect("/login");
     }
@@ -352,9 +354,9 @@ function handleAvatar(req, res) {
 
     if (username) {
         const buffer = generateAvatar(username[0]);
-        const url = `public/avatar/${username}`;
+        const url = `public/images/${username}`;
 
-        user.avatar_url = `/avatar/${username}`;
+        user.avatar_url = `/images/${username}`;
         fs.writeFileSync(url, buffer);
     }
 }
@@ -389,7 +391,7 @@ function addPost(title, content, user) {
 // and https://flaviocopes.com/canvas-node-generate-image/
 function generateAvatar(letter, width = 100, height = 100) {
     // Write the letter with the same font we'll used in other parts of the site
-    const fontPath = path.join(__dirname, "/public/Gaegu/Gaegu-Regular.ttf");
+    const fontPath = path.join(__dirname, "/public/css/Gaegu/Gaegu-Regular.ttf");
     canvas.registerFont(fontPath, { family: "Gaegu", weight: "400", style: "normal"});
     
     // 1. Choose a color scheme based on the letter
