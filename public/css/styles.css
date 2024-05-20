@@ -88,7 +88,7 @@ label, input, textarea, .or, .title, nav, button {
     border: none;
     background-color: transparent;
     color: black;
-    font-size: 20px;
+    line-height: 20px;
 }
 
 button.heart, button.trash {

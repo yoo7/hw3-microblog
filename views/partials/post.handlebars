@@ -16,7 +16,7 @@
         <span class="content gaegu-class">{{this.content}}</span>
         <!-- the post -->
         <div class="post-status-bar">
-           <!-- Determine whether to show post + likes OR the trashcan depending on the user-->
+           <!-- Determine whether to show like button OR the trashcan depending on the user-->
             {{#ifCond this.username user.username}}
                 <div class="delete">
                     <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
@@ -48,14 +48,23 @@
         event.preventDefault();
 
         const postId = event.target.getAttribute("data-id");
-        event.target.textContent = event.target.textContent === "♡" ? "♥" : "♡";
+        let likeUp = true;
+
+        if (event.target.textContent === "♡") {
+            // Like the post
+            event.target.textContent = "♥";
+        } else {
+            // Unlike the post
+            event.target.textContent = "♡";
+            likeUp = false;
+        }
   
         fetch("/like/" + postId, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: "id=${encodeURIComponent(postId)}"  // TODO not sure what to do for body (taken from tutorial)
+            body: `likeUp=${encodeURIComponent(likeUp)}`  // TODO not sure what to do for body (taken from tutorial)
         })
         .then(res => res.text())
         .then(text => event.target.nextElementSibling.textContent = parseInt(text) + " likes")

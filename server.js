@@ -129,11 +129,6 @@ app.get("/error", (req, res) => {
 
 // Additional routes that you must implement
 
-
-app.get("/post/:id", (req, res) => {
-    // TODO: Render post detail page
-    const id = req.params.id;
-});
 app.post("/posts", (req, res) => {
     // Add new post and redirect to home
     // Corresponds with the code that uses the form method in home.handlebars
@@ -153,7 +148,13 @@ app.get("/profile", isAuthenticated, (req, res) => {
     renderProfile(req, res);
 });
 app.get("/avatar/:username", (req, res) => {
-    // TODO: Serve the avatar image for the user
+    // Serve the avatar image for the user
+    const username = req.params.username;
+    const user = findUserByUsername(username);
+
+    // Send the image back as a response
+    console.log(__dirname);
+    res.sendFile(path.join(__dirname, username));
 });
 app.post("/register", (req, res) => {
     // Register a new user
@@ -328,9 +329,16 @@ function updatePostLikes(req, res) {
     const postId = req.params.id;
     const post = findPostById(postId);
 
+    // User is (un)liking a post that isn't theirs
     if (findUserByUsername(post.username) !== req.session.userId) {
-        // User is liking a post that isn't theirs
-        post.likes++;
+        const likeUp = req.body.likeUp;
+
+        if (likeUp === "true") {
+            post.likes++;
+        } else {
+            post.likes--;
+        }
+
         res.send("" + post.likes);
     }
 }

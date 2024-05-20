@@ -79,7 +79,7 @@ function toggleEmojiPanel() {
                 displayEmojis(allEmojis);
             })
             .catch(error => {
-                console.error("Error fetching emojis: ", error);
+                console.error("Error fetching emojis:", error);
             });
     }
 }
@@ -125,9 +125,27 @@ function insertEmoji(emoji) {
     textarea.insertAdjacentHTML("beforeend", emoji);
 
     // Make the user cursor show up after the just-inserted-emoji
-    const val = textarea.value;  // Store the value
-    textarea.value = "";  // Reset
-    textarea.value = val;  // Set the old value again
+    const val = textarea.innerHTML;  // Store the value
+    textarea.innerHTML = "";  // Reset
+    textarea.innerHTML = val;  // Set the old value again
+    
+    console.log(textarea.value);
+    console.log(textarea.textContent);
+    console.log(textarea.innerHTML);
+
+    /*
+    console.log(textarea.textContent);
+    // Append to the innerHTML rather than textContent because emojis are encoded in HTML
+    // Append to the end of the innerHTML but before the div ends
+    textarea.insertAdjacentHTML("beforeend", emoji);
+
+    console.log(textarea.textContent);
+    textarea.focus();
+    // Make the user cursor show up after the just-inserted-emoji
+    const val = textarea.innerHTML;  // Store the value
+    textarea.innerHTML = "";  // Reset
+    textarea.innerHTML = val;  // Set the old value again
+    */
 }
 
 </script>
