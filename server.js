@@ -141,7 +141,6 @@ app.post("/posts", isAuthenticated, (req, res) => {
 });
 app.post("/like/:id", isAuthenticated, (req, res) => {
     // Update post likes
-    console.log("liking!");
     updatePostLikes(req, res);
 });
 app.get("/profile", isAuthenticated, (req, res) => {
@@ -318,11 +317,17 @@ function renderProfile(req, res) {
     const user = getCurrentUser(req);
     const usersPosts = findPostsByUser(user.username).reverse();
     
-    res.render("profile", {posts: usersPosts, user: user})
+    res.render("profile", { posts: usersPosts, user: user })
 }
 
 // Function to update post likes
 function updatePostLikes(req, res) {
+    // Don't let user like the post if not logged in
+    console.log("session id:", req.session.userId);
+    if (!req.session.userId) {
+        res.redirect("/login");
+    }
+
     const postId = req.params.id;
     const post = findPostById(postId);
 

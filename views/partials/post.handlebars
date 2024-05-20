@@ -46,16 +46,7 @@
         event.preventDefault();
 
         const postId = event.target.getAttribute("data-id");
-        let likeUp = true;
-
-        if (event.target.textContent === "♡") {
-            // Like the post
-            event.target.textContent = "♥";
-        } else {
-            // Unlike the post
-            event.target.textContent = "♡";
-            likeUp = false;
-        }
+        let likeUp = (event.target.textContent === "♡");
   
         fetch("/like/" + postId, {
             method: "POST",
@@ -65,13 +56,29 @@
             body: `likeUp=${encodeURIComponent(likeUp)}`
         })
         .then(res => res.text())
-        .then(text => event.target.nextElementSibling.textContent = parseInt(text) + " likes")
+        .then(text => {
+            const numLikes = parseInt(text);
+
+            // User was logged in, so we got some # other than NaN
+            // Allow the likes to actually get updated on the DOM
+            if (!isNaN(numLikes)) {
+                event.target.nextElementSibling.textContent =  + " likes";
+
+                if (likeUp) {
+                    // Like the post
+                    event.target.textContent = "♥";
+                } else {
+                    // Unlike the post
+                    event.target.textContent = "♡";
+                }
+            }
+        })
         .catch(error => console.error("Error:", error));     
     }
 
     function handleDeleteClick(event) {
-        {{!-- const buttonElement = event.target.closest(".delete-button"); --}}
-        const postId = event.target.getAttribute("data-id");        
+        const buttonElement = event.target.closest(".delete-button");
+        const postId = buttonElement.getAttribute("data-id");        
 
         fetch("/delete/" + postId, {
             method: "POST",
