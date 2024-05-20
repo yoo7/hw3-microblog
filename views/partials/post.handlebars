@@ -42,8 +42,6 @@
 </div>
 <script>
 
-    // TODO need to add eventListeners??
-
     function handleLikeClick(event) {
         event.preventDefault();
 
@@ -64,26 +62,23 @@
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: `likeUp=${encodeURIComponent(likeUp)}`  // TODO not sure what to do for body (taken from tutorial)
+            body: `likeUp=${encodeURIComponent(likeUp)}`
         })
         .then(res => res.text())
         .then(text => event.target.nextElementSibling.textContent = parseInt(text) + " likes")
         .catch(error => console.error("Error:", error));     
-        // TODO need to check someone is actually signed in...also would have to rmemember which posts they liked??
-        // TODO so maybe another handlebar helper to determine which to display...
     }
 
     function handleDeleteClick(event) {
         const buttonElement = event.target.closest(".delete-button");
         const postId = buttonElement.getAttribute("data-id");        
 
-        // TODO you might want to "fetch" something...   
         fetch("/delete/" + postId, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: "userAnswer=${encodeURIComponent(userAnswer)}"  // TODO not sure what to do for body (taken from tutorial)
+            body: "userAnswer=${encodeURIComponent(userAnswer)}"  // TODO change the body
         })
         .then(response => response.text())
         .catch(error => console.error('Error:', error));    

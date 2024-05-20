@@ -129,7 +129,7 @@ app.get("/error", (req, res) => {
 
 // Additional routes that you must implement
 
-app.post("/posts", (req, res) => {
+app.post("/posts", isAuthenticated, (req, res) => {
     // Add new post and redirect to home
     // Corresponds with the code that uses the form method in home.handlebars
     const title = req.body.title;
@@ -139,8 +139,9 @@ app.post("/posts", (req, res) => {
     addPost(title, content, user);
     res.redirect("/");
 });
-app.post("/like/:id", (req, res) => {
+app.post("/like/:id", isAuthenticated, (req, res) => {
     // Update post likes
+    console.log("liking!");
     updatePostLikes(req, res);
 });
 app.get("/profile", isAuthenticated, (req, res) => {
@@ -150,7 +151,6 @@ app.get("/profile", isAuthenticated, (req, res) => {
 app.get("/avatar/:username", (req, res) => {
     // Serve the avatar image for the user
     const username = req.params.username;
-    const user = findUserByUsername(username);
 
     // Send the image back as a response
     console.log(__dirname);
@@ -164,7 +164,7 @@ app.post("/login", (req, res) => {
     // Login a user
     loginUser(req, res);
 });
-app.get("/logout", (req, res) => {
+app.get("/logout", isAuthenticated, (req, res) => {
     logoutUser(req, res);
 });
 app.post("/delete/:id", isAuthenticated, (req, res) => {
@@ -238,6 +238,7 @@ function findPostById(postId) {
     return posts.find(post => post.id === id);
 }
 
+// Function to get current time and return as string
 function getCurrTime() {
     const date = new Date();
     return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
@@ -321,11 +322,6 @@ function renderProfile(req, res) {
 
 // Function to update post likes
 function updatePostLikes(req, res) {
-    // TODO: Increment post likes if conditions are met
-    // TODO decrement likes if liked already (not sure how to make it remember if liked already tho?)
-
-    // TODO if this post isn't the current user's, then get the post obj and increment likes
-    // TODO hopefully the number gets updated too on the screen but idk
     const postId = req.params.id;
     const post = findPostById(postId);
 
