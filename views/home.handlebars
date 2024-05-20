@@ -120,32 +120,15 @@ function insertEmoji(emoji) {
 
     textarea.focus();  // Keep focus on the textarea
 
-    // Append to the innerHTML rather than textContent because emojis are encoded in HTML
-    // Append to the end of the innerHTML but before the div ends
-    textarea.insertAdjacentHTML("beforeend", emoji);
+    const i = textarea.selectionStart;
+    const firstSubstr = textarea.value.substring(0, i);
+    const secondSubstr = textarea.value.substring(i);
 
-    // Make the user cursor show up after the just-inserted-emoji
-    const val = textarea.innerHTML;  // Store the value
-    textarea.innerHTML = "";  // Reset
-    textarea.innerHTML = val;  // Set the old value again
     
-    console.log(textarea.value);
-    console.log(textarea.textContent);
-    console.log(textarea.innerHTML);
+    textarea.value = firstSubstr + emoji + secondSubstr;
 
-    /*
-    console.log(textarea.textContent);
-    // Append to the innerHTML rather than textContent because emojis are encoded in HTML
-    // Append to the end of the innerHTML but before the div ends
-    textarea.insertAdjacentHTML("beforeend", emoji);
-
-    console.log(textarea.textContent);
     textarea.focus();
-    // Make the user cursor show up after the just-inserted-emoji
-    const val = textarea.innerHTML;  // Store the value
-    textarea.innerHTML = "";  // Reset
-    textarea.innerHTML = val;  // Set the old value again
-    */
+    textarea.setSelectionRange(i + emoji.length, i + emoji.length);
 }
 
 </script>
