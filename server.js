@@ -6,6 +6,9 @@ const session = require("express-session");
 const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
+require("dotenv").config();
+
+const apiKey = process.env.API_KEY;
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,6 +192,25 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
         // They're not the owner
     }    
 });
+app.get("/emojis", (req, res) => {
+    // Code from 5/17/24 lecture from Dr. Posnett
+    
+    if (!fs.existsSync(path.join(__dirname, "emojis.json"))) {
+        console.log("in here!");
+        const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
+
+        // Get the emojis since the file doesn't exist, THEN send emojis
+        fetch(url)
+            .then(response => response.json())
+            .then(data => fs.writeFile("emojis.json", JSON.stringify(data), (error) => error && console.error("Error fetching emojis:", error)))
+            .then(data => sendEmojis(req, res))
+            .catch(error => {
+                console.error("Error fetching emojis:", error);
+            });
+    } else {
+        sendEmojis(req, res);
+    }
+});
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Server Activation
@@ -344,6 +366,22 @@ function updatePostLikes(req, res) {
 
         res.send("" + post.likes);
     }
+}
+
+// Send the emojis to user
+// Code from 5/17/24 lecture from Dr. Posnett
+function sendEmojis(req, res) {
+    const emojisPath = path.join(__dirname, "emojis.json");
+
+    fs.readFile(emojisPath, "utf8", (err, data) => {
+        if (err) {
+            console.error("Error reading emoji file:", err);
+            res.status(500).json({ error: "Failed to load emojis." });
+        } else {
+            res.setHeader("Content-Type", "application/json");
+            res.send(data);
+        }
+    })
 }
 
 // Function to handle avatar generation and serving the user's avatar image

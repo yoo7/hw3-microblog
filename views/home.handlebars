@@ -66,13 +66,8 @@ function toggleEmojiPanel() {
     container.style.display = container.style.display === "none" ? "block" : "none";
 
     if (container.style.display === "block" && allEmojis.length === 0) {
-        // Go "Fetch" you some emojis and show them off with displayEmojis
-        // In Part B, use environment variable to not hard-code the API key
-        const apiKey = "828c77b09984470071838f84685c16e107a613a5";
-        const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
-
         // Fetch emojis, turn the response into JSON, update allEmojis, anddisplay the toggle
-        fetch(url)
+        fetch("/emojis")
             .then(response => response.json())
             .then(data => {
                 allEmojis = data;
