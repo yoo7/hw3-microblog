@@ -158,7 +158,7 @@ app.get("/avatar/:username", (req, res) => {
     const username = req.params.username;
 
     // Send the image back as a response
-    console.log(__dirname);
+    // console.log(__dirname);
     res.sendFile(path.join(__dirname, username));
 });
 app.post("/register", (req, res) => {
@@ -189,13 +189,14 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
         posts.splice(postId - 1, 1);
     } else {
         // They're not the owner
+        res.redirect("/error");
     }    
 });
 app.get("/emojis", (req, res) => {
     // Code from 5/17/24 lecture from Dr. Posnett
     
     if (!fs.existsSync(path.join(__dirname, "emojis.json"))) {
-        console.log("in here!");
+        // console.log("in here!");
         const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
 
         // Get the emojis since the file doesn't exist, THEN send emojis
@@ -276,7 +277,7 @@ function addUser(username) {
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
-    console.log(req.session.userId);
+    // console.log(req.session.userId);
 
     if (req.session.userId) {
         // Finished processing info, so move on to the actual route function
