@@ -158,7 +158,7 @@ app.get("/avatar/:username", (req, res) => {
     const username = req.params.username;
 
     // Send the image back as a response
-    console.log(__dirname);
+    // console.log(__dirname);
     res.sendFile(path.join(__dirname, username));
 });
 app.post("/register", (req, res) => {
@@ -187,9 +187,9 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
     if (postOwner === req.session.username) {
         // They are the owner of this id
         posts.splice(postId - 1, 1);
-        res.redirect("/")
     } else {
         // They're not the owner
+        res.redirect("/error");
     }    
 });
 app.get("/emojis", (req, res) => {
@@ -276,7 +276,7 @@ function addUser(username) {
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
-    console.log(req.session.userId);
+    // console.log(req.session.userId);
 
     if (req.session.userId) {
         // Finished processing info, so move on to the actual route function
@@ -414,7 +414,7 @@ function addPost(title, content, user) {
     // If all ids are used, then add the post at posts[posts.length]
     for (let i = 0; i <= posts.length; i++) {
         if (posts[i] === undefined) {
-            posts[i] = { id: i, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
+            posts[i] = { id: i + 1, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
             return;
         }
     }
