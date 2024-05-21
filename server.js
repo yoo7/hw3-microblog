@@ -187,7 +187,6 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
     if (postOwner === req.session.username) {
         // They are the owner of this id
         posts.splice(postId - 1, 1);
-        res.redirect("/")
     } else {
         // They're not the owner
     }    
