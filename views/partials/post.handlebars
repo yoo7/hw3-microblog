@@ -1,7 +1,7 @@
 {{! Partial for a single post }}
 <div class="post">
     <div class="post-avatar">
-        <!-- Conditional rendering based on variables copied this code from main.handlebars-->
+        <!-- Conditional rendering based on variables -->
         <img src="{{#if this.avatar_url}}
                         {{this.avatar_url}}
                     {{else}}
@@ -32,9 +32,6 @@
                     </div>
                 </div>
             {{/ifCond}}
-            
-
-            <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
 
             <div class="timestamp">Noted at {{this.timestamp}} by {{this.username}}</div>
         </div>        
@@ -46,6 +43,8 @@
         event.preventDefault();
 
         const postId = event.target.getAttribute("data-id");
+
+        // If the heart isn't filled, then clicking it means we are liking (rather than unliking)
         let likeUp = (event.target.textContent === "♡");
   
         fetch("/like/" + postId, {
@@ -60,7 +59,7 @@
             const numLikes = parseInt(text);
 
             // User was logged in, so we got some # other than NaN
-            // Allow the likes to actually get updated on the DOM
+            // So we allow the likes to actually get updated on the DOM
             if (!isNaN(numLikes)) {
                 event.target.nextElementSibling.textContent = numLikes + " likes";
 
@@ -78,21 +77,17 @@
 
     function handleDeleteClick(event) {
         // Climb up html hierachy to locate post html element
-        // event.target = button element
-        // button -> delete div -> post-status-bar -> post-content -> post
+        // Hierarchy: button -> delete div -> post-status-bar -> post-content -> post
         const postElement = event.target.parentElement.parentElement.parentElement.parentElement;
         const postId = event.target.getAttribute("data-id");      
 
         fetch("/delete/" + postId, {
             method: "POST",
-            //headers: {
-            //    "Content-Type": "application/x-www-form-urlencoded",
-            //},
-            //body: "userAnswer=${encodeURIComponent(userAnswer)}"  // TODO change the body
         })
         .then(response => response.text())
         .catch(error => console.error('Error:', error));
-            
+        
+        // Remove from DOM
         postElement.remove();
     }    
 </script>

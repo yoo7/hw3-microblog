@@ -158,7 +158,6 @@ app.get("/avatar/:username", (req, res) => {
     const username = req.params.username;
 
     // Send the image back as a response
-    // console.log(__dirname);
     res.sendFile(path.join(__dirname, username));
 });
 app.post("/register", (req, res) => {
@@ -195,10 +194,11 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
 app.get("/emojis", (req, res) => {
     // Code from 5/17/24 lecture from Dr. Posnett
 
+    // If emojis.json doesn't exist, fetch it
     if (!fs.existsSync(path.join(__dirname, "emojis.json"))) {
         const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
 
-        // Get the emojis since the file doesn't exist, THEN send emojis
+        // Get the emojis, THEN send emojis
         fetch(url)
             .then(response => response.json())
             .then(data => fs.writeFile("emojis.json", JSON.stringify(data), (error) => error && console.error("Error fetching emojis:", error)))
@@ -207,6 +207,7 @@ app.get("/emojis", (req, res) => {
                 console.error("Error fetching emojis:", error);
             });
     } else {
+        // File already exists, so directly send the emojis
         sendEmojis(req, res);
     }
 });

@@ -276,7 +276,7 @@ input {
 }
 
 .login-register button, input {
-    border-radius: 3px;
+    border-radius: 5px;
 }
 
 button {

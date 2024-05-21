@@ -6,12 +6,9 @@
     {{#if loggedIn}}
         <!-- show the create post form when logged in -->
         <section class="post-form">
-            <!-- make a header here -->
             <form action="/posts" method="POST">
-                <!-- title input field name = "title" -->
                 <input class="gaegu-regular" type="text" id="title" name="title" required=true placeholder="Title"/>
 
-                <!-- text area input field name = "content" -->
                 <textarea class="gaegu-regular" id="content" name="content" required=true placeholder="What's happening?"></textarea>
 
                 <div class="form-actions">
@@ -66,7 +63,7 @@ function toggleEmojiPanel() {
     container.style.display = container.style.display === "none" ? "block" : "none";
 
     if (container.style.display === "block" && allEmojis.length === 0) {
-        // Fetch emojis, turn the response into JSON, update allEmojis, anddisplay the toggle
+        // Fetch emojis, turn the response into JSON, update allEmojis, and display the toggle
         fetch("/emojis")
             .then(response => response.json())
             .then(data => {
@@ -115,13 +112,15 @@ function insertEmoji(emoji) {
 
     textarea.focus();  // Keep focus on the textarea
 
+    // Insert the emoji where the user cursor is
     const i = textarea.selectionStart;
     const firstSubstr = textarea.value.substring(0, i);
     const secondSubstr = textarea.value.substring(i);
 
-    
     textarea.value = firstSubstr + emoji + secondSubstr;
 
+    // Put the user cursor one after the emoji that was just inserted
+    // Remembe that emojis are not just one ASCII character
     textarea.focus();
     textarea.setSelectionRange(i + emoji.length, i + emoji.length);
 }
