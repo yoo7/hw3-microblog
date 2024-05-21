@@ -67,7 +67,7 @@ function toggleEmojiPanel() {
 
     if (container.style.display === "block" && allEmojis.length === 0) {
         // Go "Fetch" you some emojis and show them off with displayEmojis
-        // TODO Later: use .config file or environment variables so we don't hard-code the API key?
+        // In Part B, use environment variable to not hard-code the API key
         const apiKey = "828c77b09984470071838f84685c16e107a613a5";
         const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
 

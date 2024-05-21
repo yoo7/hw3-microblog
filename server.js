@@ -7,6 +7,7 @@ const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
 
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Configuration and Setup
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,25 +170,23 @@ app.get("/logout", isAuthenticated, (req, res) => {
     logoutUser(req, res);
 });
 app.post("/delete/:id", isAuthenticated, (req, res) => {
-    // TODO: Delete a post if the current user is the owner
+    // Delete a post if the current user is the owner
     
     // Uses requesting post's username to crosscheck with current logged in user
     const postOwner = req.params.username;
 
     // Also takes the postId from req
     const postId = req.params.id;
-    // const postToDelete = findPostById(postId);
 
-    // TODO Find the matching postid, then check if the 
-        // TODO post writer is same as current writer. 
-        // TODO If so, actually delete the post by splicing posts[id] out of array
+    // Find the matching postid, then check if the 
+    // post writer is same as current writer. 
+    // If so, actually delete the post by splicing posts[id] out of array
     if (postOwner === req.session.username) {
         // They are the owner of this id
-        posts.splice(postId-1, 1);
+        posts.splice(postId - 1, 1);
         res.redirect("/")
     } else {
         // They're not the owner
-        // TODO Error message
     }    
 });
 
@@ -363,9 +362,7 @@ function handleAvatar(req, res) {
 
 // Function to get the current user from session
 function getCurrentUser(req) {
-    // TODO: Return the user object if the session user ID matches
-
-    // TODO check session user ID
+    // Return the user object if the session user ID matches
     return findUserById(req.session.userId);
 }
 
