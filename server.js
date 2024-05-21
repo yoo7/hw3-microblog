@@ -194,9 +194,8 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
 });
 app.get("/emojis", (req, res) => {
     // Code from 5/17/24 lecture from Dr. Posnett
-    
+
     if (!fs.existsSync(path.join(__dirname, "emojis.json"))) {
-        console.log("in here!");
         const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
 
         // Get the emojis since the file doesn't exist, THEN send emojis
