@@ -415,7 +415,7 @@ function addPost(title, content, user) {
     // If all ids are used, then add the post at posts[posts.length]
     for (let i = 0; i <= posts.length; i++) {
         if (posts[i] === undefined) {
-            posts[i] = { id: i, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
+            posts[i] = { id: i + 1, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
             return;
         }
     }
