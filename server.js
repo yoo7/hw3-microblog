@@ -8,8 +8,14 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
-const apiKey = process.env.API_KEY;
+const { google } = require("googleapis");
+const { OAuth2Client } = require("google-auth-library");
 
+const API_KEY = process.env.API_KEY;
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
+const client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Configuration and Setup
@@ -81,7 +87,6 @@ app.use(
 
 // Replace any of these variables below with constants for your application. These variables
 // should be used in your template files. 
-// 
 app.use((req, res, next) => {
     res.locals.appName = "Whiteboard";
     res.locals.copyrightYear = 2024;
@@ -196,7 +201,7 @@ app.get("/emojis", (req, res) => {
 
     // If emojis.json doesn't exist, fetch it
     if (!fs.existsSync(path.join(__dirname, "emojis.json"))) {
-        const url = `https://emoji-api.com/emojis?access_key=${apiKey}`;
+        const url = `https://emoji-api.com/emojis?access_key=${API_KEY}`;
 
         // Get the emojis, THEN send emojis
         fetch(url)
@@ -211,6 +216,42 @@ app.get("/emojis", (req, res) => {
         sendEmojis(req, res);
     }
 });
+app.get("/auth/google", (req, res) => {
+    // Code from 5/22 discussion with Zeerak
+    // Want user email and profile
+    const url = client.generateAuthUrl({
+        access_type: "offline",
+        scope: ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
+    });
+
+    // Go to the callback function
+    // Once Google verifies authorization, it goes to the callback function below
+    res.redirect(url);
+});
+app.get("/auth/google/callback", async (req, res) => {
+    // Code from 5/22 discussion with Zeerak
+    const { code } = req.query;
+    const { tokens } = await client.getToken(code);
+    client.setCredentials(tokens);
+
+    const oauth2 = google.oauth2({
+        auth: client,
+        version: "v2",
+    });
+
+    const userinfo = await oauth2.userinfo.get();
+    
+    res.send(`
+        <h1>Hello, ${userinfo.data.name}</h1>
+        <p>Email: ${userinfo.data.email}</p>
+        <img src="${userinfo.data.picture}" alt="Profile PIcture">
+        <br>
+        <a href="/logout">Logout from App</a>
+        <br>
+    `);
+});
+
+// ahref /auth/google
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Server Activation

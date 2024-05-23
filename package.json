@@ -6,6 +6,8 @@
         "express-session": "^1.18.0"
     },
     "dependencies": {
-        "dotenv": "^16.4.5"
+        "dotenv": "^16.4.5",
+        "google-auth-library": "^9.10.0",
+        "googleapis": "^137.1.0"
     }
 }

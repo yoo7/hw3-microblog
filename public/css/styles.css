@@ -23,7 +23,11 @@ header {
     justify-content: space-between;
     padding: 0px 2vw;
     height: 100px;
-    margin: auto;
+    margin: auto auto 20px auto;
+}
+
+header, footer {
+    overflow: hidden;
 }
 
 .logo {
@@ -109,6 +113,7 @@ button.heart, button.trash {
 .timestamp {
     display: flex;
     justify-self: flex-end;
+    text-align: right;
 }
 
 .content-container {
@@ -122,6 +127,8 @@ button.heart, button.trash {
 
 nav {
     display: flex;
+    justify-content: center;
+    justify-items: center;
     align-content: center;
     align-items: center;
     flex-wrap: nowrap;
@@ -146,7 +153,7 @@ nav ul {
 }
 
 input {
-    width: 150px;
+    width: 15vw;
 }
 
 .post-form {
@@ -182,7 +189,7 @@ input {
     align-items: flex-start;
     background-color: #FFFADD;
     box-shadow: 10px 10px #8ECDDD;
-    width: 30em;
+    width: 40vw;
     padding: 30px;
     margin: auto auto 50px auto;
 }
@@ -272,7 +279,8 @@ input {
 
 .or {
     white-space: nowrap;
-    margin: 50px;
+    margin: 3vw;
+    font-size: 2vw;
 }
 
 .login-register button, input {
@@ -282,9 +290,9 @@ input {
 button {
     background-color: #22668D;
     color: #FFFADD;
-    width: 100px;
+    width: 10vw;
     border-radius: 5px;
-    padding: 5px;
+    padding: 3px;
 }
 
 button:hover {
@@ -299,77 +307,100 @@ footer {
     background-color: #2a343eee;
 }
 
-@media screen and (max-width: 950px) {
+@media screen and (max-width: 750px) {
     header {
-        padding: 10px 20px;
-        height: 70px;
-        margin: auto;
+        flex-direction: column;
+        justify-content: center;
+        justify-items: center;
+        align-content: center;
+        align-items: center;
+        padding: 7vw;
+        height: fit-content;
+        margin: auto auto 8vw auto;
     }
-    
+  
     h1 {
-        font-size: 42px;
+        font-size: 12vw;
+        margin: 0;
+        padding: 0;
     }
-    
     h2 {
-        font-size: 30px;
+        font-size: 5vw;
     }
 
-    body {
-        position: absolute;
-    }
-    
-    label, input, textarea, .or, .title, nav, button {
-        font-size: 20px;
-    }
-    
-    .content, footer {
-        font-size: 15px;
-    }
-    
-    nav ul li {
-        list-style: none;
-        padding: 3.5px 8px;
-    }
-    
-    nav ul li a {
-        text-decoration: none;
-    }
-    
-    nav ul {
+    .logo {
         display: flex;
         justify-content: center;
         justify-items: center;
         align-content: center;
         align-items: center;
     }
+
+    .logo img {
+        width: 12vw;
+    }
+
+    nav {
+        margin: 1vw auto auto auto;
+        justify-items: space-evenly;
+    }
+
+    nav ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    .post-avatar img, .user-info img {
+        border-radius: 2vw;
+        width: 8vw;
+        height: auto;
+    }
+
+    label, input, textarea, .or, .title, nav, button {
+        font-size: 5vw;
+    }
+    
+    .content, footer {
+        font-size: 3.5vw;
+    }
+
+    .content {
+        margin: 1.2vw auto 1.3vw 0;
+    }
     
     input {
-        width: 140px;
+        width: 30vw;
     }
 
     .post {
-        width: 15em;
-    }
-
-    .content-container {
-        flex-direction: column;
+        width: 70vw;
     }
 
     .timestamp {
-        margin: auto auto auto 22px;
+        margin: auto 0 auto 3vw;
+    }
+
+    .heart, .trash {
+        margin: auto 5vw auto auto;
+        line-height: 2vw;
+    }
+    
+    button.heart, button.trash {
+        width: 2vw;
     }
 
     .post-status-bar {
-        grid-template-columns: 1fr 3fr;
+        grid-template-columns: 1fr 8fr;
+        font-size: 2.7vw;
     }
 
     .post-form {
-        width: 25em;
-        margin: 20px auto 20px auto;
+        width: 80%;
+        margin: 4vw auto 4vw auto;
     }
     
     .posts-list ul {
-        margin: 20px;
+        margin: 2vw;
     }
 
     .profile {
@@ -390,24 +421,17 @@ footer {
         justify-items: center;
         align-content: center;
         align-items: center;
-        padding: 7px;
+        padding: 2vw;
         flex-direction: column;
     }
     
-    .or {
-        white-space: nowrap;
-    }
-    
     button {
-        width: 100px;
+        width: 25vw;
     }
 
-    
     footer {
         text-align: center;
-        padding: 30px;
-        margin: 30px auto auto auto;
-        color: #FFCC70;
-        background-color: #2a343eee;
+        padding: 10vw;
+        margin: 15vw auto auto auto;
     }
 }
