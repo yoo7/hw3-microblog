@@ -6,10 +6,15 @@ const session = require("express-session");
 const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
+
 require("dotenv").config();
 
+// TODO maybe we don't need these two anymore?
 const { google } = require("googleapis");
 const { OAuth2Client } = require("google-auth-library");
+
+// const passport = require('passport');
+// const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
@@ -103,6 +108,23 @@ app.use(express.static("public"));                  // Serve static files
 app.use(express.urlencoded({ extended: true }));    // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.json());                            // Parse JSON bodies (as sent by API clients)
 
+// Configure passport
+// passport.use(new GoogleStrategy({
+//     clientID: CLIENT_ID,
+//     clientSecret: CLIENT_SECRET,
+//     callbackURL: `http://localhost:${PORT}/auth/google/callback`
+// }, (token, tokenSecret, profile, done) => {
+//     return done(null, profile);
+// }));
+
+// passport.serializeUser((user, done) => {
+//     done(null, user);
+// });
+
+// passport.deserializeUser((obj, done) => {
+//     done(null, obj);
+// });
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Routes
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,11 +132,10 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 // Home route: render home view with posts and user
 // We pass the posts and user variables into the home
 // template
-//
-// TODO not sure about the async + await keywords here?
 app.get("/", async (req, res) => {
     const posts = await getPosts();
     const user = await getCurrentUser(req) || {};
+    console.log(user);
 
     // Use home.handlebars
     res.render("home", { posts, user });
@@ -170,9 +191,9 @@ app.get("/avatar/:username", (req, res) => {
     // Send the image back as a response
     res.sendFile(path.join(__dirname, username));
 });
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
     // Register a new user
-    registerUser(req, res)
+    await registerUser(req, res);
 });
 app.post("/login", async (req, res) => {
     // Login a user
@@ -221,60 +242,70 @@ app.get("/emojis", (req, res) => {
         sendEmojis(req, res);
     }
 });
-app.get("/auth/google", (req, res) => {
-    // Code from 5/22 discussion with Zeerak
-    // Want user email and profile
-    const url = client.generateAuthUrl({
-        access_type: "offline",
-        scope: ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
-    });
+// app.get("/auth/google", (req, res) => {
+//     // Code from 5/22 discussion with Zeerak
+//     // Want user email and profile
+//     const url = client.generateAuthUrl({
+//         access_type: "offline",
+//         scope: ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
+//     });
 
-    // Go to the callback function
-    // Once Google verifies authorization, it goes to the callback function below
-    res.redirect(url);
-});
-app.get("/auth/google/callback",
-	passport.authenticate("google", { failureRedirect: "/" }),
-	async (req, res) => {
-        // Code frmo 5/24 lecture with Dr. Posnett
+//     // Go to the callback function
+//     // Once Google verifies authorization, it goes to the callback function below
+//     res.redirect(url);
+// });
+// app.get("/auth/google/callback",
+// 	passport.authenticate("google", { failureRedirect: "/" }),
+// 	async (req, res) => {
+//         // Code frmo 5/24 lecture with Dr. Posnett
 
-		const googleId = req.user.id;
-		const hashedGoogleId = hash(googleId);
-		req.session.hashedGoogleId = hashedGoogleId;
+// 		const googleId = req.user.id;
+// 		const hashedGoogleId = hash(googleId);
 
-        // TODO not sure if this is correct but modify as needed
-//     // TODO hash the user id and then store that instead of directly storing the id
-//     const user = getCurrentUser();
-//     const db = await getDbConnection();
+//         // TODO he put this line here, but we don't have a hashedGoogleId line
+//         // TODO but he also uses the userId attribute below so maybe we need both??
+// 		req.session.hashedGoogleId = hashedGoogleId;
 
-//     if (foundMatches(user)) {
-//         // TODO update the value in the SQL data base
-//         const hashedGoogleId = `${userinfo.data.picture}`
-//         let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
-//         await db.run(qry, [hashedGoogleId, user.username]);
+//         // TODO not sure if this is correct but modify as needed
+// //     // TODO hash the user id and then store that instead of directly storing the id
+// //     const user = getCurrentUser();
+// //     const db = await getDbConnection();
 
-//         fs.writeFileSync(url, buffer);
-//     }
+// //     if (foundMatches(user)) {
+// //         // TODO update the value in the SQL data base
+// //         const hashedGoogleId = `${userinfo.data.picture}`
+// //         let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
+// //         await db.run(qry, [hashedGoogleId, user.username]);
 
-//     await db.close();
+// //         fs.writeFileSync(url, buffer);
+// //     }
+
+// //     await db.close();
 		
-		try {
-		// looking up in our database, so async
-		// make the arrow function async!!! see at the third line of code
-			let localUser = await findUserByHashedGoogleId(hashedGoogleId);
-			if (localUser) {
-				req.session.userId = localUser.id;
-				req.session.loggedIn = true;
-				res.redirect("/");
-			} else {
-			    res.redirect("/registerUsername");
-			}
-        } catch (err) {
-            console.error("Error finding user:", err);
-            res.redirect("/error");
-        }
-    }
-);
+// 		try {
+// 		// looking up in our database, so async
+// 		// make the arrow function async!!! see at the third line of code
+//             const db = await getDbConnection();
+            
+// 			let localUser = await findUserByHashedGoogleId(hashedGoogleId);
+//             let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
+//             await db.run(qry, [hashedGoogleId, user.username]);
+
+// 			if (localUser) {
+// 				req.session.userId = localUser.id;
+// 				req.session.loggedIn = true;
+// 				res.redirect("/");
+// 			} else {
+// 			    res.redirect("/registerUsername");
+// 			}
+//         } catch (err) {
+//             console.error("Error finding user:", err);
+//             res.redirect("/error");
+//         }
+
+//         await db.close();
+//     }
+// );
 
 // TODO delete this later
 // app.get("/auth/google/callback", async (req, res) => {
@@ -331,29 +362,47 @@ async function findUserByUsername(username) {
     const db = await getDbConnection();
 
     let qry = "SELECT * FROM users WHERE username=? LIMIT 1";
-    let row = await db.all(qry, [username]);
+    let user = await db.get(qry, [username]);
 
     await db.close();
 
-    return row;
+    return user;
 }
 
+async function findUserByHashedGoogleId(hashedGoogleId) {
+    const db = await getDbConnection();
+
+    let qry = "SELECT * FROM users WHERE hashedGoogleId=? LIMIT 1";
+    let user = await db.get(qry, [hashedGoogleId]);
+
+    await db.close();
+
+    return user;
+}
+
+// TODO maybe delete? or keep and use with above too
 // Function to find a user by user ID
 async function findUserById(userId) {
     const db = await getDbConnection();
 
     let qry = "SELECT * FROM users WHERE id=? LIMIT 1";
-    let row = await db.all(qry, [userId]);
+    let user = await db.get(qry, [userId]);
 
     await db.close();
 
-    return row;
+    return user;
 }
 
 // Function to find posts by user ID
-function findPostsByUser(username) {
-    // TODO make this into SQL
-    return posts.filter((post) => post.username === username);
+async function findPostsByUser(username) {
+    const db = await getDbConnection();
+
+    let qry = "SELECT * FROM posts WHERE username=? ORDER BY timestamp DESC";
+    let posts = await db.all(qry, [username]);
+
+    await db.close();
+
+    return posts;
 }
 
 // Function to find a post by the postId
@@ -364,26 +413,32 @@ async function findPostById(postId) {
     const db = await getDbConnection();
 
     let qry = "SELECT * FROM posts WHERE id=?";
-    let row = await db.all(qry, [id]);
+    let post = await db.get(qry, [id]);
 
     await db.close();
 
-    return row;
+    return post;
+}
+
+// Function to get current time and return as string
+function getCurrTime() {
+    const date = new Date();
+    return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
 }
 
 // Function to add a new user to the users array
 async function addUser(username) {
     const db = await getDbConnection();
 
-    let qry = "INSERT INTO users(username) VALUES(?)";
-    let row = await db.run(qry, [username]);
+    let qry = "INSERT INTO users(username, timestamp) VALUES(?, ?)";
+    let row = await db.run(qry, [username, getCurrTime()]);
 
     await db.close();
 }
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
-    // console.log(req.session.userId);
+    console.log(req.session.userId);
 
     if (req.session.userId) {
         // Finished processing info, so move on to the actual route function
@@ -394,8 +449,30 @@ function isAuthenticated(req, res, next) {
     }
 }
 
+function isEmptyObj(obj) {
+    // Not an object
+    if (typeof queryRes !== 'object') {
+        return false;
+    }
+
+    // Check if it contains the key property
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            return false;
+        }
+    }
+
+    // Did not find any of the keys, so it's an empty object
+    return true;
+}
+
+function isEmptyArr(arr) {
+    return Array.isArray(arr) && arr.length > 0;
+}
+
 function foundMatches(queryRes) {
-    return queryRes && queryRes.length > 0;
+    // Valid return result from the query string -- a nonempty object or a nonempty array
+    return queryRes && (queryRes !== undefined) && (queryRes !== null) && (!isEmptyObj(queryRes) || !isEmptyArr(queryRes));
 }
 
 // Function to register a user
@@ -450,7 +527,7 @@ function logoutUser(req, res) {
 async function renderProfile(req, res) {
     // Fetch user posts and render the profile page
     const user = await getCurrentUser(req);
-    const usersPosts = await findPostsByUser(user.username).reverse();
+    const usersPosts = await findPostsByUser(user.username);
     
     res.render("profile", { posts: usersPosts, user: user })
 }
@@ -536,9 +613,7 @@ async function getPosts() {
     const db = await getDbConnection();
 
     let qry = "SELECT * FROM posts ORDER BY timestamp DESC";
-    let rows = await db.exec(qry);
-
-    console.log("getPosts rows", rows);
+    let rows = await db.all(qry);
 
     await db.close();
 
@@ -549,8 +624,8 @@ async function getPosts() {
 async function addPost(title, content, user) {
     const db = await getDbConnection();
 
-    let qry = "INSERT INTO posts(title, content, username) VALUES(?, ?, ?)";
-    let row = await db.exec(qry, [title, content, user.username]);
+    let qry = "INSERT INTO posts(title, content, username, timestamp, likes) VALUES(?, ?, ?, ?, ?)";
+    await db.run(qry, [title, content, user.username, getCurrTime(), 0]);
 
     await db.close();
 }

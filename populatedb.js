@@ -2,6 +2,7 @@
 
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
+const path = require("path");
 
 // Placeholder for the database file name
 const dbFileName = "whiteboard.db";
@@ -30,15 +31,15 @@ async function initializeDB() {
 
     // Example data for posts and users
     const users = [
-        { username: "whatsyelp", hashedGoogleId: "hashedGoogleId1", avatar_url: "", memberSince: "2023-12-17 10:11:00" },
-        { username: "technologically-challenged", hashedGoogleId: "hashedGoogleId2", avatar_url: "", memberSince: "2024-02-03 20:34:00" },
-        { username: "SuperStudious", hashedGoogleId: "hashedGoogleId3", avatar_url: "", memberSince: "2024-03-02 15:12:00" },
+        { username: "whatsyelp", hashedGoogleId: "hashedGoogleId1", avatar_url: "/images/whatsyelp", memberSince: "12/17/2023, 10:11 AM" },
+        { username: "technologically-challenged", hashedGoogleId: "hashedGoogleId2", avatar_url: "/images/technologically-challenged", memberSince: "2/3/2024, 8:34 PM" },
+        { username: "SuperStudious", hashedGoogleId: "hashedGoogleId3", avatar_url: "/images/SuperStudious", memberSince: "3/2/2024, 3:12 PM" },
     ];
 
     const posts = [
-        { title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "2024-01-02 13:32:00", likes: 0 },
-        { title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "2024-03-24, 17:31:00", likes: 0 },
-        { title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "2024-04-29, 01:04:00", likes: 0 },
+        { title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0 },
+        { title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0 },
+        { title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "4/29/2024, 1:04 AM", likes: 0 },
     ];
 
     // Insert sample data into the database
