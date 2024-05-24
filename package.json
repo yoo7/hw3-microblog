@@ -8,6 +8,8 @@
     "dependencies": {
         "dotenv": "^16.4.5",
         "google-auth-library": "^9.10.0",
-        "googleapis": "^137.1.0"
+        "googleapis": "^137.1.0",
+        "sqlite": "^5.1.1",
+        "sqlite3": "^5.1.7"
     }
 }

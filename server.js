@@ -11,6 +11,9 @@ require("dotenv").config();
 const { google } = require("googleapis");
 const { OAuth2Client } = require("google-auth-library");
 
+const sqlite3 = require("sqlite3");
+const sqlite = require("sqlite");
+
 const API_KEY = process.env.API_KEY;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
@@ -108,9 +111,10 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 // We pass the posts and user variables into the home
 // template
 //
-app.get("/", (req, res) => {
-    const posts = getPosts();
-    const user = getCurrentUser(req) || {};
+// TODO not sure about the async + await keywords here?
+app.get("/", async (req, res) => {
+    const posts = await getPosts();
+    const user = await getCurrentUser(req) || {};
 
     // Use home.handlebars
     res.render("home", { posts, user });
@@ -132,21 +136,22 @@ app.get("/login", (req, res) => {
 
 // Error route: render error page
 //
-app.get("/error", (req, res) => {
-    const user = getCurrentUser(req);
+app.get("/error", async (req, res) => {
+    const user = await getCurrentUser(req);
     
     res.render("error", { user: user });
 });
 
 // Additional routes that you must implement
 
-app.post("/posts", isAuthenticated, (req, res) => {
+app.post("/posts", isAuthenticated, async (req, res) => {
     // Add new post and redirect to home
     // Corresponds with the code that uses the form method in home.handlebars
     const title = req.body.title;
     const content = req.body.content;
-    const user = findUserById(req.session.userId);
+    const user = await findUserById(req.session.userId);
 
+    // TODO async stuff?
     addPost(title, content, user);
     res.redirect("/");
 });
@@ -169,9 +174,9 @@ app.post("/register", (req, res) => {
     // Register a new user
     registerUser(req, res)
 });
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
     // Login a user
-    loginUser(req, res);
+    await loginUser(req, res);
 });
 app.get("/logout", isAuthenticated, (req, res) => {
     logoutUser(req, res);
@@ -228,30 +233,76 @@ app.get("/auth/google", (req, res) => {
     // Once Google verifies authorization, it goes to the callback function below
     res.redirect(url);
 });
-app.get("/auth/google/callback", async (req, res) => {
-    // Code from 5/22 discussion with Zeerak
-    const { code } = req.query;
-    const { tokens } = await client.getToken(code);
-    client.setCredentials(tokens);
+app.get("/auth/google/callback",
+	passport.authenticate("google", { failureRedirect: "/" }),
+	async (req, res) => {
+        // Code frmo 5/24 lecture with Dr. Posnett
 
-    const oauth2 = google.oauth2({
-        auth: client,
-        version: "v2",
-    });
+		const googleId = req.user.id;
+		const hashedGoogleId = hash(googleId);
+		req.session.hashedGoogleId = hashedGoogleId;
 
-    const userinfo = await oauth2.userinfo.get();
-    
-    res.send(`
-        <h1>Hello, ${userinfo.data.name}</h1>
-        <p>Email: ${userinfo.data.email}</p>
-        <img src="${userinfo.data.picture}" alt="Profile PIcture">
-        <br>
-        <a href="/logout">Logout from App</a>
-        <br>
-    `);
-});
+        // TODO not sure if this is correct but modify as needed
+//     // TODO hash the user id and then store that instead of directly storing the id
+//     const user = getCurrentUser();
+//     const db = await getDbConnection();
 
-// ahref /auth/google
+//     if (foundMatches(user)) {
+//         // TODO update the value in the SQL data base
+//         const hashedGoogleId = `${userinfo.data.picture}`
+//         let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
+//         await db.run(qry, [hashedGoogleId, user.username]);
+
+//         fs.writeFileSync(url, buffer);
+//     }
+
+//     await db.close();
+		
+		try {
+		// looking up in our database, so async
+		// make the arrow function async!!! see at the third line of code
+			let localUser = await findUserByHashedGoogleId(hashedGoogleId);
+			if (localUser) {
+				req.session.userId = localUser.id;
+				req.session.loggedIn = true;
+				res.redirect("/");
+			} else {
+			    res.redirect("/registerUsername");
+			}
+        } catch (err) {
+            console.error("Error finding user:", err);
+            res.redirect("/error");
+        }
+    }
+);
+
+// TODO delete this later
+// app.get("/auth/google/callback", async (req, res) => {
+//     // Code from 5/22 discussion with Zeerak
+//     const { code } = req.query;
+//     const { tokens } = await client.getToken(code);
+//     client.setCredentials(tokens);
+
+//     const oauth2 = google.oauth2({
+//         auth: client,
+//         version: "v2",
+//     });
+
+//     const userinfo = await oauth2.userinfo.get();
+
+//     res.send(`
+//         <h1>Hello, ${userinfo.data.name}</h1>
+//         <p>Email: ${userinfo.data.email}</p>
+//         <img src="${userinfo.data.picture}" alt="Profile Picture">
+//         <br>
+//         <a href="/logout">Logout from App</a>
+//         <br>
+//     `);
+
+//   
+// });
+
+// TODO a href /auth/google
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Server Activation
@@ -265,55 +316,69 @@ app.listen(PORT, () => {
 // Support Functions and Variables
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// Example data for posts and users
-let posts = [
-    { id: 1, title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0 },
-    { id: 2, title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0 },
-    { id: 3, title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "4/29/2024, 1:04 AM", likes: 0 },
-];
-let users = [
-    { id: 1, username: "whatsyelp", avatar_url: undefined, memberSince: "12/17/2023, 10:11 AM" },
-    { id: 2, username: "technologically-challenged", avatar_url: undefined, memberSince: "2/3/2024, 8:34 PM" },
-    { id: 3, username: "SuperStudious", avatar_url: undefined, memberSince: "3/2/2024, 3:12 PM" },
-];
+// Code from 5/22 lecture with Dr. Posnett
+async function getDbConnection() {
+    const db = await sqlite.open({
+        filename: path.join(__dirname, "whiteboard.db"),
+        driver: sqlite3.Database
+    });
+
+    return db;
+}
 
 // Function to find a user by username
-function findUserByUsername(username) {
-    // Return user object if exists, otherwise return undefined
-    // For each user in users, check if the username matches the given one
-    return users.find(user => user.username === username);
+async function findUserByUsername(username) {
+    const db = await getDbConnection();
+
+    let qry = "SELECT * FROM users WHERE username=? LIMIT 1";
+    let row = await db.all(qry, [username]);
+
+    await db.close();
+
+    return row;
 }
 
 // Function to find a user by user ID
-function findUserById(userId) {
-    // Return user object if found, otherwise return undefined
-    return users.find(user => user.id === userId);
+async function findUserById(userId) {
+    const db = await getDbConnection();
+
+    let qry = "SELECT * FROM users WHERE id=? LIMIT 1";
+    let row = await db.all(qry, [userId]);
+
+    await db.close();
+
+    return row;
 }
 
 // Function to find posts by user ID
 function findPostsByUser(username) {
+    // TODO make this into SQL
     return posts.filter((post) => post.username === username);
 }
 
 // Function to find a post by the postId
-function findPostById(postId) {
+async function findPostById(postId) {
     // Turn the id from string to number
     const id = parseInt(postId);
-    return posts.find(post => post.id === id);
-}
 
-// Function to get current time and return as string
-function getCurrTime() {
-    const date = new Date();
-    return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
+    const db = await getDbConnection();
+
+    let qry = "SELECT * FROM posts WHERE id=?";
+    let row = await db.all(qry, [id]);
+
+    await db.close();
+
+    return row;
 }
 
 // Function to add a new user to the users array
-function addUser(username) {
-    // Use first unavailable ID number
-    const id = users[users.length - 1].id + 1;
+async function addUser(username) {
+    const db = await getDbConnection();
 
-    users[users.length] = { id: id, username: username, avatar_url: undefined, memberSince: getCurrTime() };
+    let qry = "INSERT INTO users(username) VALUES(?)";
+    let row = await db.run(qry, [username]);
+
+    await db.close();
 }
 
 // Middleware to check if user is authenticated
@@ -329,13 +394,18 @@ function isAuthenticated(req, res, next) {
     }
 }
 
-// Function to register a user
-function registerUser(req, res) {
-    const user = findUserByUsername(req.body.username);
+function foundMatches(queryRes) {
+    return queryRes && queryRes.length > 0;
+}
 
-    if (!user) {
+// Function to register a user
+async function registerUser(req, res) {
+    const user = await findUserByUsername(req.body.username);
+
+    if (!foundMatches(user)) {
         // Username doesn't exist, so we can register new user and redirect appropriately
         addUser(req.body.username);
+        // TODO some Google OAuth stuff?
         handleAvatar(req, res);
         res.redirect("/login");
     } else {
@@ -345,11 +415,11 @@ function registerUser(req, res) {
 }
 
 // Function to login a user
-function loginUser(req, res) {
-    const user = findUserByUsername(req.body.username);
+async function loginUser(req, res) {
+    const user = await findUserByUsername(req.body.username);
 
     // User exists
-    if (user) {
+    if (foundMatches(user)) {
         // Login user and redirect
         req.session.userId = user.id;
         req.session.loggedIn = true;
@@ -377,26 +447,29 @@ function logoutUser(req, res) {
 }
 
 // Function to render the profile page
-function renderProfile(req, res) {
+async function renderProfile(req, res) {
     // Fetch user posts and render the profile page
-    const user = getCurrentUser(req);
-    const usersPosts = findPostsByUser(user.username).reverse();
+    const user = await getCurrentUser(req);
+    const usersPosts = await findPostsByUser(user.username).reverse();
     
     res.render("profile", { posts: usersPosts, user: user })
 }
 
 // Function to update post likes
-function updatePostLikes(req, res) {
+async function updatePostLikes(req, res) {
     // Don't let user like the post if not logged in
     if (!req.session.userId) {
         res.redirect("/login");
     }
 
     const postId = req.params.id;
-    const post = findPostById(postId);
+    const post = await findPostById(postId);
+    const user = await findUserByUsername(post.username);
 
     // User is (un)liking a post that isn't theirs
-    if (findUserByUsername(post.username) !== req.session.userId) {
+    if (user.id !== req.session.userId) {
+        const db = await getDbConnection();
+
         const likeUp = req.body.likeUp;
 
         if (likeUp === "true") {
@@ -404,6 +477,11 @@ function updatePostLikes(req, res) {
         } else {
             post.likes--;
         }
+
+        let qry = "UPDATE posts SET likes = ? WHERE username = ?";
+        await db.run(qry, [post.likes, user.username]);
+
+        await db.close();
 
         res.send("" + post.likes);
     }
@@ -426,40 +504,55 @@ function sendEmojis(req, res) {
 }
 
 // Function to handle avatar generation and serving the user's avatar image
-function handleAvatar(req, res) {
+async function handleAvatar(req, res) {
     const username = req.body.username;
-    const user = findUserByUsername(username);
+    const db = await getDbConnection();
 
     if (username) {
         const buffer = generateAvatar(username[0]);
         const url = `public/images/${username}`;
+        const avatar_url = `/images/${username}`;
 
-        user.avatar_url = `/images/${username}`;
+        // TODO remove/update eventually when we have the Google OAuth stuff...
+        let qry = "UPDATE users SET avatar_url = ? WHERE username = ?";
+        await db.run(qry, [avatar_url, username]);
+
         fs.writeFileSync(url, buffer);
     }
+
+    await db.close();
 }
 
 // Function to get the current user from session
-function getCurrentUser(req) {
+async function getCurrentUser(req) {
     // Return the user object if the session user ID matches
-    return findUserById(req.session.userId);
+    const user = await findUserById(req.session.userId);
+    
+    return user;
 }
 
 // Function to get all posts, sorted by latest first
-function getPosts() {
-    return posts.slice().reverse();
+async function getPosts() {
+    const db = await getDbConnection();
+
+    let qry = "SELECT * FROM posts ORDER BY timestamp DESC";
+    let rows = await db.exec(qry);
+
+    console.log("getPosts rows", rows);
+
+    await db.close();
+
+    return rows;
 }
 
 // Function to add a new post
-function addPost(title, content, user) {
-    // Find the smallest id number that hasn't been taken and update the list
-    // If all ids are used, then add the post at posts[posts.length]
-    for (let i = 0; i <= posts.length; i++) {
-        if (posts[i] === undefined) {
-            posts[i] = { id: i + 1, title: title, content: content, username: user.username, timestamp: getCurrTime(), likes: 0 };
-            return;
-        }
-    }
+async function addPost(title, content, user) {
+    const db = await getDbConnection();
+
+    let qry = "INSERT INTO posts(title, content, username) VALUES(?, ?, ?)";
+    let row = await db.exec(qry, [title, content, user.username]);
+
+    await db.close();
 }
 
 // Function to generate an image avatar
