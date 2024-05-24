@@ -172,8 +172,7 @@ app.post("/posts", isAuthenticated, async (req, res) => {
     const content = req.body.content;
     const user = await findUserById(req.session.userId);
 
-    // TODO async stuff?
-    addPost(title, content, user);
+    await addPost(title, content, user);
     res.redirect("/");
 });
 app.post("/like/:id", isAuthenticated, (req, res) => {
@@ -202,7 +201,7 @@ app.post("/login", async (req, res) => {
 app.get("/logout", isAuthenticated, (req, res) => {
     logoutUser(req, res);
 });
-app.post("/delete/:id", isAuthenticated, (req, res) => {
+app.post("/delete/:id", isAuthenticated, async (req, res) => {
     // Delete a post if the current user is the owner
     
     // Uses requesting post's username to crosscheck with current logged in user
@@ -216,7 +215,13 @@ app.post("/delete/:id", isAuthenticated, (req, res) => {
     // If so, actually delete the post by splicing posts[id] out of array
     if (postOwner === req.session.username) {
         // They are the owner of this id
-        posts.splice(postId - 1, 1);
+        const db = await getDbConnection();
+
+        let qry = "DELETE FROM users WHERE id=?";
+        await db.run(qry, [postId]);
+    
+        await db.close();
+        
     } else {
         // They're not the owner
         res.redirect("/error");
@@ -430,8 +435,9 @@ function getCurrTime() {
 async function addUser(username) {
     const db = await getDbConnection();
 
-    let qry = "INSERT INTO users(username, timestamp) VALUES(?, ?)";
-    let row = await db.run(qry, [username, getCurrTime()]);
+    // TODO: Need google hashed id here too
+    let qry = "INSERT INTO users(username, hashedGoogleId, memberSince) VALUES(?, ?, ?)";
+    let row = await db.run(qry, [username, req.session.hashedGoogleId, getCurrTime()]);
 
     await db.close();
 }
@@ -480,6 +486,8 @@ async function registerUser(req, res) {
     const user = await findUserByUsername(req.body.username);
 
     if (!foundMatches(user)) {
+        // TODO need to pass hashedGoogleId
+
         // Username doesn't exist, so we can register new user and redirect appropriately
         addUser(req.body.username);
         // TODO some Google OAuth stuff?
