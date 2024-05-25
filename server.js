@@ -73,6 +73,35 @@ app.engine(
                 }
                 return options.inverse(this);
             },
+            alreadyLiked: function (likedBy, username) {
+                if (username === undefined) {
+                    console.log("username is undefined!");
+                    return false;
+                }
+
+                if (likedBy === null || likedBy === undefined || likedBy === "" || !likedBy.includes(username)) {
+                    console.log("hasn't been liked yet");
+                    return false;
+                }
+
+                return true;
+
+                // const db = await getDbConnection();
+
+                // let qry = "SELECT * FROM posts WHERE id=?";
+                // let row = await db.get(qry, [postId]);
+                // let str = row.likedBy;
+                // console.log("(postId, username, str):", postId, username, str);
+
+                // await db.close();
+
+                // if (str === null || str === undefined || str === "" || !str.includes(username)) {
+                //     console.log("hasn't been liked yet");
+                //     return false;
+                // }
+
+                // return true;
+            }
         },
     })
 );
@@ -135,7 +164,6 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 app.get("/", async (req, res) => {
     const posts = await getPosts();
     const user = await getCurrentUser(req) || {};
-    console.log(user);
 
     // Use home.handlebars
     res.render("home", { posts, user });
@@ -217,7 +245,7 @@ app.post("/delete/:id", isAuthenticated, async (req, res) => {
         // They are the owner of this id
         const db = await getDbConnection();
 
-        let qry = "DELETE FROM users WHERE id=?";
+        let qry = "DELETE FROM posts WHERE id=?";
         await db.run(qry, [postId]);
     
         await db.close();
@@ -486,11 +514,8 @@ async function registerUser(req, res) {
     const user = await findUserByUsername(req.body.username);
 
     if (!foundMatches(user)) {
-        // TODO need to pass hashedGoogleId
-
         // Username doesn't exist, so we can register new user and redirect appropriately
         addUser(req.body.username);
-        // TODO some Google OAuth stuff?
         handleAvatar(req, res);
         res.redirect("/login");
     } else {
@@ -549,22 +574,45 @@ async function updatePostLikes(req, res) {
 
     const postId = req.params.id;
     const post = await findPostById(postId);
-    const user = await findUserByUsername(post.username);
+    const postUser = await findUserByUsername(post.username);
+    const currUser = await getCurrentUser(req);
 
     // User is (un)liking a post that isn't theirs
-    if (user.id !== req.session.userId) {
+    if (postUser !== currUser) {
         const db = await getDbConnection();
 
-        const likeUp = req.body.likeUp;
+        let qry = "SELECT * FROM posts WHERE id=?";
+        let row = await db.get(qry, [postId]);
+        let likedBy = row.likedBy;
 
-        if (likeUp === "true") {
+        console.log("likedBy:", likedBy);
+
+        // TODO condense into function
+        if (likedBy === null || !likedBy.includes(currUser.username)) {
+            console.log("like UP!");
             post.likes++;
+
+            if (likedBy === null) {
+                likedBy = "";
+            }
+
+            likedBy += `,${currUser.username}`
         } else {
+            console.log("like down...");
             post.likes--;
+
+            // TODO Condense into function -- remove the username from the list of likedBy
+            let i = likedBy.indexOf("," + currUser.username);
+            let leftSubstr = likedBy.substr(0, i);
+            let rightSubstr = likedBy.substr(i + currUser.username.length + 1);
+            likedBy = leftSubstr + rightSubstr;
         }
 
-        let qry = "UPDATE posts SET likes = ? WHERE username = ?";
-        await db.run(qry, [post.likes, user.username]);
+
+        console.log("new likedBy:", likedBy);
+
+        qry = "UPDATE posts SET likes = ?, likedBy = ? WHERE username = ?";
+        await db.run(qry, [post.likes, likedBy, postUser.username]);
 
         await db.close();
 

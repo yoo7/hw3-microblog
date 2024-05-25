@@ -25,7 +25,8 @@ async function initializeDB() {
             content TEXT NOT NULL,
             username TEXT NOT NULL,
             timestamp DATETIME NOT NULL,
-            likes INTEGER NOT NULL
+            likes INTEGER NOT NULL,
+            likedBy STRING
         );
     `);
 
@@ -37,9 +38,9 @@ async function initializeDB() {
     ];
 
     const posts = [
-        { title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0 },
-        { title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0 },
-        { title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "4/29/2024, 1:04 AM", likes: 0 },
+        { title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 0, likedBy: ""},
+        { title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 0, likedBy: "" },
+        { title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "4/29/2024, 1:04 AM", likes: 0, likedBy: "" },
     ];
 
     // Insert sample data into the database
