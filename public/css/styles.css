@@ -220,7 +220,30 @@ input {
     align-items: center;
 }
 
-.posts-list ul, .users-posts ul {
+.options {
+    display: none;
+}
+
+.options ul li {
+    list-style: none;
+}
+
+.options li:hover {
+    background-color: #FFFADD;
+    cursor: pointer;
+}
+
+.selected {
+    background-color: #8ECDDD;
+    cursor: default;
+}
+
+.visible {
+    display: flex;
+    flex-direction: column;
+}
+
+.posts-list .show-posts ul, .users-posts ul {
     padding-inline-start: 0px;
 }
 

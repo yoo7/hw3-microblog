@@ -41,7 +41,7 @@
         </ul>
 
         
-        <div class="posts">
+        <div class="show-posts">
             {{#if posts.length}}
             <ul>
                 {{#each posts}}
@@ -153,7 +153,7 @@ function toggleDropdown() {
 
 function changeSort(event) {
     // No posts anyway
-    if (document.getElementsByClassName("post").length === 0) {
+    if (document.getElementsByClassName("show-posts").length === 0) {
         return;
     }
     const newSelected = event.target;
@@ -164,26 +164,41 @@ function changeSort(event) {
     }
 
     const currSelected = document.getElementsByClassName("selected")[0];
-    let sortedPosts = [];
-
-    // Get the newly sorted posts
-    fetch("/sort/" + currSelected.id)
-    .then(response => response.json())
-    .then(data => sortedPosts = data)
-    .catch(error => {
-        console.error("Error changing filter:", error);
-    });
-
-    // Replace the old post ordering with the new one
-    const posts = document.getElementsByClassName("posts")[0];
-    posts.innerHTML = "";  // Clear it
-    
-
-
     currSelected.classList.remove("selected");
     currSelected.addEventListener("click", changeSort);
     newSelected.classList.add("selected");
     newSelected.removeEventListener("click", changeSort);
+
+    let sortedPosts = [];
+
+    // Get the newly sorted posts
+    fetch("/sort/" + newSelected.id)
+    .then(response => response.json())
+    .then(data => {
+        sortedPosts = data;
+
+        // Replace the old post ordering with the new one
+        const posts = document.getElementsByClassName("show-posts")[0];
+        posts.innerHTML = "";  // Clear it
+        console.log("sortedPosts:", sortedPosts);
+
+        posts.innerHTML = `<ul>\{\{#each ${sortedPosts}\}\}
+                                    \{\{> post this user=../user\}\} 
+                            \{\{/each\}\}
+                          </ul>`;
+        
+        /* TODO
+        const str = "<ul>\{\{#each " + `${sortedPosts}` + `\}\}
+                                    \{\{> post this user=../user\}\} 
+                        \{\{/each\}\}
+                    </ul>`
+
+        posts.innerHTML = str;
+        */
+    })
+    .catch(error => {
+        console.error("Error changing filter:", error);
+    });
 }
 
 </script>
