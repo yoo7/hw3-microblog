@@ -12,8 +12,8 @@
                 <textarea class="gaegu-regular" id="content" name="content" required=true placeholder="What's happening?"></textarea>
 
                 <div class="form-actions">
-                    <button type="button" class="emoji-button gaegu-regular" onclick="toggleEmojiPanel()">😀</button>
-                    <button type="submit" class="post-button gaegu-regular">POST</button>
+                    <button type="button" class="gaegu-regular" onclick="toggleEmojiPanel()">😀</button>
+                    <button type="submit" class="gaegu-regular">POST</button>
                 </div>
             </form>
 
@@ -30,18 +30,30 @@
 
     <section class="posts-list">
         <!-- recent posts -->
-        <h2 class="gaegu-regular">&mdash; Recent {{toLowerCase postNeoType}}s from {{postNeoType}}-Takers &mdash;</h2>
+        <h2>&mdash; {{postNeoType}}s from {{postNeoType}}-Takers &mdash;</h2>
 
-        {{#if posts.length}}
-        <ul>
-            {{#each posts}}
-                <!-- you have to pass the user in to posts and this is the syntax -->
-                {{> post this user=../user}}            
-            {{/each}}
+        <button type="button" class="gaegu-regular" onclick="toggleDropdown()">Sort by: Recent</button>
+        <ul class="options">
+            <li id="recent" class="selected">Recent</li>
+            <li id="oldest">Oldest</li>
+            <li id="most-liked">Most Liked</li>
+            <li id="least-liked">Least Liked</li>
         </ul>
-        {{else}}
-            <p>No recent {{toLowerCase postNeoType}}s taken...</p>
-        {{/if}}
+
+        
+        <div class="posts">
+            {{#if posts.length}}
+            <ul>
+                {{#each posts}}
+                    <!-- you have to pass the user in to posts and this is the syntax -->
+                    {{> post this user=../user}}            
+                {{/each}}
+            </ul>
+            {{else}}
+                <p>No recent {{toLowerCase postNeoType}}s taken...</p>
+            {{/if}}
+        </div>
+        
     </section>
 </section>
 
@@ -57,6 +69,14 @@
 */
 
 let allEmojis = [];  // Global list to hold all emojis
+const recent = document.getElementById("recent");
+const oldest = document.getElementById("oldest");
+const mostLiked = document.getElementById("most-liked");
+const leastLiked = document.getElementById("least-liked");
+
+oldest.addEventListener("click", changeSort);
+mostLiked.addEventListener("click", changeSort);
+leastLiked.addEventListener("click", changeSort);
 
 function toggleEmojiPanel() {
     const container = document.getElementById("emoji-container");
@@ -120,9 +140,52 @@ function insertEmoji(emoji) {
     textarea.value = firstSubstr + emoji + secondSubstr;
 
     // Put the user cursor one after the emoji that was just inserted
-    // Remembe that emojis are not just one ASCII character
+    // Remember that emojis are not just one ASCII character
     textarea.focus();
     textarea.setSelectionRange(i + emoji.length, i + emoji.length);
+}
+
+function toggleDropdown() {
+    const options = document.getElementsByClassName("options")[0];
+    options.classList.toggle("visible");
+}
+
+
+function changeSort(event) {
+    // No posts anyway
+    if (document.getElementsByClassName("post").length === 0) {
+        return;
+    }
+    const newSelected = event.target;
+
+    if (newSelected.classList.contains("selected")) {
+        // Already using this filter
+        return;
+    }
+
+    const currSelected = document.getElementsByClassName("selected")[0];
+    let sortedPosts = [];
+
+    // Get the newly sorted posts
+    fetch("/sort/" + currSelected.id)
+    .then(response => response.json())
+    .then(data => sortedPosts = data)
+    .catch(error => {
+        console.error("Error changing filter:", error);
+    });
+
+    // Replace the old post ordering with the new one
+    const posts = document.getElementsByClassName("posts")[0];
+    posts.innerHTML = "";  // Clear it
+    posts.innerHTML = `<ul>{{#each ${sortedPosts}}}
+                                {{> post this user=../user}}} 
+                            {{/each}}
+                        </ul>`
+
+    currSelected.classList.remove("selected");
+    currSelected.addEventListener("click", changeSort);
+    newSelected.classList.add("selected");
+    newSelected.removeEventListener("click", changeSort);
 }
 
 </script>
