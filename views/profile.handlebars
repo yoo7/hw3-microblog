@@ -3,23 +3,24 @@
 
 <section class="profile">
     <div class="profile-container">
-    <div class="profile-avatar">
-        <!-- Conditional rendering based on variables copied this code from main.handlebars-->
-        <img src="{{#if user.avatar_url}}
-                        {{user.avatar_url}}
-                    {{else}}
-                        /images/{{user.username}}
-                    {{/if}}" 
-                    alt="User Avatar" 
-                    class="header-avatar">
-        
+        <div class="profile-avatar">
+            <!-- Conditional rendering based on variables copied this code from main.handlebars-->
+            <img src="{{#if user.avatar_url}}
+                            {{user.avatar_url}}
+                        {{else}}
+                            /images/{{user.username}}
+                        {{/if}}" 
+                        alt="User Avatar" 
+                        class="header-avatar">
+            
+        </div>
+
+        <section class="profile-info">
+            <p><span class="bold gaegu-class">Username:</span> {{user.username}}</p>
+            <p><span class="bold gaegu-class">Member Since:</span> {{user.memberSince}}</p>
+        </section>
     </div>
-    
-    <section class="profile-info">
-        <p><span class="bold gaegu-class">Username:</span> {{user.username}}</p>
-        <p><span class="bold gaegu-class">Member Since:</span> {{user.memberSince}}</p>
-    </section>
-</div>
+</section>
 
 <section class="user-posts">
     <!-- you can call posts tweets, or truths, or whatever, these are neologisms. Choose your own new in server.js -->
@@ -37,5 +38,4 @@
             <!-- fix this up with some helper functions and other handlebars expressions, or add you own character -->
             <p>You have not posted yet, {{postNeoType}}-Taker!</p>
         {{/if}}
-</section>
 </section>

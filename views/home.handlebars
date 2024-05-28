@@ -177,10 +177,8 @@ function changeSort(event) {
     // Replace the old post ordering with the new one
     const posts = document.getElementsByClassName("posts")[0];
     posts.innerHTML = "";  // Clear it
-    posts.innerHTML = `<ul>{{#each ${sortedPosts}}}
-                                {{> post this user=../user}}} 
-                            {{/each}}
-                        </ul>`
+    
+
 
     currSelected.classList.remove("selected");
     currSelected.addEventListener("click", changeSort);

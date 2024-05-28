@@ -75,12 +75,10 @@ app.engine(
             },
             alreadyLiked: function (likedBy, username) {
                 if (username === undefined) {
-                    console.log("username is undefined!");
                     return false;
                 }
 
                 if (likedBy === null || likedBy === undefined || likedBy === "" || !likedBy.includes(username)) {
-                    console.log("hasn't been liked yet");
                     return false;
                 }
 
@@ -275,6 +273,26 @@ app.get("/emojis", (req, res) => {
         sendEmojis(req, res);
     }
 });
+app.get("/sort/:sortType", async (req, res) => {
+    let sortType = req.params.sortType;
+
+    if (sortType === "recent") {
+        sortType = "timestamp DESC";
+    } else if (sortType === "oldest") {
+        sortType = "timestamp";  // Ascending
+    } else if (sortType === "most-liked") {
+        sortType = "likes DESC";
+    } else if (sortType === "least-liked") {
+        sortType = "likes";
+    } else {
+        console.error("Unrecognized sort type");
+        return;
+    }
+
+    const posts = await getPosts(sortType);
+    res.send(posts);
+
+});
 // app.get("/auth/google", (req, res) => {
 //     // Code from 5/22 discussion with Zeerak
 //     // Want user email and profile
@@ -382,10 +400,16 @@ app.listen(PORT, () => {
 
 // Code from 5/22 lecture with Dr. Posnett
 async function getDbConnection() {
-    const db = await sqlite.open({
-        filename: path.join(__dirname, "whiteboard.db"),
-        driver: sqlite3.Database
-    });
+    let db = null;
+
+    try {
+        db = await sqlite.open({
+            filename: path.join(__dirname, "whiteboard.db"),
+            driver: sqlite3.Database
+        });
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     return db;
 }
@@ -393,33 +417,47 @@ async function getDbConnection() {
 // Function to find a user by username
 async function findUserByUsername(username) {
     const db = await getDbConnection();
+    let user = null;
 
-    let qry = "SELECT * FROM users WHERE username=? LIMIT 1";
-    let user = await db.get(qry, [username]);
+    try {
+        let qry = "SELECT * FROM users WHERE username=? LIMIT 1";
+        user = await db.get(qry, [username]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
-
+    
     return user;
 }
 
 async function findUserByHashedGoogleId(hashedGoogleId) {
     const db = await getDbConnection();
+    let user = null;
 
-    let qry = "SELECT * FROM users WHERE hashedGoogleId=? LIMIT 1";
-    let user = await db.get(qry, [hashedGoogleId]);
+    try {
+        let qry = "SELECT * FROM users WHERE hashedGoogleId=? LIMIT 1";
+        user = await db.get(qry, [hashedGoogleId]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
 
     return user;
 }
 
-// TODO maybe delete? or keep and use with above too
 // Function to find a user by user ID
 async function findUserById(userId) {
     const db = await getDbConnection();
+    let user = null;
 
-    let qry = "SELECT * FROM users WHERE id=? LIMIT 1";
-    let user = await db.get(qry, [userId]);
+    try {
+        let qry = "SELECT * FROM users WHERE id=? LIMIT 1";
+        user = await db.get(qry, [userId]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
 
@@ -427,11 +465,16 @@ async function findUserById(userId) {
 }
 
 // Function to find posts by user ID
-async function findPostsByUser(username) {
+async function findPostsByUser(username, sortType="timestamp DESC") {
     const db = await getDbConnection();
+    let posts = null;
 
-    let qry = "SELECT * FROM posts WHERE username=? ORDER BY timestamp DESC";
-    let posts = await db.all(qry, [username]);
+    try {
+        let qry = `SELECT * FROM posts WHERE username=? ORDER BY ${sortType}`;
+        posts = await db.all(qry, [username]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
 
@@ -444,9 +487,14 @@ async function findPostById(postId) {
     const id = parseInt(postId);
 
     const db = await getDbConnection();
+    let post = null;
 
-    let qry = "SELECT * FROM posts WHERE id=?";
-    let post = await db.get(qry, [id]);
+    try {
+        let qry = "SELECT * FROM posts WHERE id=?";
+        post = await db.get(qry, [id]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
 
@@ -463,17 +511,20 @@ function getCurrTime() {
 async function addUser(username) {
     const db = await getDbConnection();
 
-    // TODO: Need google hashed id here too
-    let qry = "INSERT INTO users(username, hashedGoogleId, memberSince) VALUES(?, ?, ?)";
-    let row = await db.run(qry, [username, req.session.hashedGoogleId, getCurrTime()]);
+
+    try {
+        // TODO: Need google hashed id here too
+        let qry = "INSERT INTO users(username, hashedGoogleId, memberSince) VALUES(?, ?, ?)";
+        let row = await db.run(qry, [username, req.session.hashedGoogleId, getCurrTime()]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
 }
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
-    console.log(req.session.userId);
-
     if (req.session.userId) {
         // Finished processing info, so move on to the actual route function
         next();
@@ -565,6 +616,30 @@ async function renderProfile(req, res) {
     res.render("profile", { posts: usersPosts, user: user })
 }
 
+function updateLikes(currUsername, postLikes, likedBy) {
+    if (likedBy === null || !likedBy.includes(currUsername)) {
+        postLikes++;
+
+        if (likedBy === null) {
+            likedBy = "";
+        }
+
+        // Add username to the list of ppl who liked this post
+        likedBy += `,${currUsername}`
+    } else {
+        postLikes--;
+
+        // Remove username from the list of ppl who liked this post
+        let i = likedBy.indexOf("," + currUsername);
+        let leftSubstr = likedBy.substr(0, i);
+        let rightSubstr = likedBy.substr(i + currUsername.length + 1);
+        likedBy = leftSubstr + rightSubstr;
+    }
+
+    return [postLikes, likedBy];
+}
+
+
 // Function to update post likes
 async function updatePostLikes(req, res) {
     // Don't let user like the post if not logged in
@@ -581,38 +656,20 @@ async function updatePostLikes(req, res) {
     if (postUser !== currUser) {
         const db = await getDbConnection();
 
-        let qry = "SELECT * FROM posts WHERE id=?";
-        let row = await db.get(qry, [postId]);
-        let likedBy = row.likedBy;
+        try {
+            let qry = "SELECT * FROM posts WHERE id=?";
+            let row = await db.get(qry, [postId]);
+            let likedBy = row.likedBy;
 
-        console.log("likedBy:", likedBy);
+            const res = updateLikes(currUser.username, post.likes, likedBy);
+            post.likes = res[0];
+            likedBy = res[1];
 
-        // TODO condense into function
-        if (likedBy === null || !likedBy.includes(currUser.username)) {
-            console.log("like UP!");
-            post.likes++;
-
-            if (likedBy === null) {
-                likedBy = "";
-            }
-
-            likedBy += `,${currUser.username}`
-        } else {
-            console.log("like down...");
-            post.likes--;
-
-            // TODO Condense into function -- remove the username from the list of likedBy
-            let i = likedBy.indexOf("," + currUser.username);
-            let leftSubstr = likedBy.substr(0, i);
-            let rightSubstr = likedBy.substr(i + currUser.username.length + 1);
-            likedBy = leftSubstr + rightSubstr;
+            qry = "UPDATE posts SET likes = ?, likedBy = ? WHERE username = ?";
+            await db.run(qry, [post.likes, likedBy, postUser.username]);
+        } catch (error) {
+            console.error("Error:", error);
         }
-
-
-        console.log("new likedBy:", likedBy);
-
-        qry = "UPDATE posts SET likes = ?, likedBy = ? WHERE username = ?";
-        await db.run(qry, [post.likes, likedBy, postUser.username]);
 
         await db.close();
 
@@ -665,11 +722,16 @@ async function getCurrentUser(req) {
 }
 
 // Function to get all posts, sorted by latest first
-async function getPosts() {
+async function getPosts(sortType="timestamp DESC") {
     const db = await getDbConnection();
+    let rows = null;
 
-    let qry = "SELECT * FROM posts ORDER BY timestamp DESC";
-    let rows = await db.all(qry);
+    try {
+        let qry = `SELECT * FROM posts ORDER BY ${sortType}`;
+        rows = await db.all(qry);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
 
@@ -680,8 +742,12 @@ async function getPosts() {
 async function addPost(title, content, user) {
     const db = await getDbConnection();
 
-    let qry = "INSERT INTO posts(title, content, username, timestamp, likes) VALUES(?, ?, ?, ?, ?)";
-    await db.run(qry, [title, content, user.username, getCurrTime(), 0]);
+    try {
+        let qry = "INSERT INTO posts(title, content, username, timestamp) VALUES(?, ?, ?, ?)";
+        await db.run(qry, [title, content, user.username, getCurrTime()]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
 }
