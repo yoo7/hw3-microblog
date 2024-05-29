@@ -14,8 +14,8 @@ require("dotenv").config();
 const { google } = require("googleapis");
 const { OAuth2Client } = require("google-auth-library");
 
-// const passport = require('passport');
-// const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
@@ -138,21 +138,21 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 
 // Configure passport
 // TODO
-// passport.use(new GoogleStrategy({
-//     clientID: CLIENT_ID,
-//     clientSecret: CLIENT_SECRET,
-//     callbackURL: `http://localhost:${PORT}/auth/google/callback`
-// }, (token, tokenSecret, profile, done) => {
-//     return done(null, profile);
-// }));
+passport.use(new GoogleStrategy({
+    clientID: CLIENT_ID,
+    clientSecret: CLIENT_SECRET,
+    callbackURL: `http://localhost:${PORT}/auth/google/callback`
+}, (token, tokenSecret, profile, done) => {
+    return done(null, profile);
+}));
 
-// passport.serializeUser((user, done) => {
-//     done(null, user);
-// });
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
 
-// passport.deserializeUser((obj, done) => {
-//     done(null, obj);
-// });
+passport.deserializeUser((obj, done) => {
+    done(null, obj);
+});
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Routes
@@ -178,10 +178,10 @@ app.get("/", async (req, res) => {
 
 // Register GET route is used for error response from registration
 //
-app.get("/register", (req, res) => {
-    // Error message is whatever the query string value is
-    res.render("loginRegister", { regError: req.query.error });
-});
+// app.get("/register", (req, res) => {
+//     // Error message is whatever the query string value is
+//     res.render("loginRegister", { regError: req.query.error });
+// });
 
 // Login route GET route is used for error response from login
 //
@@ -225,10 +225,10 @@ app.get("/avatar/:username", (req, res) => {
     // Send the image back as a response
     res.sendFile(path.join(__dirname, username));
 });
-app.post("/register", async (req, res) => {
-    // Register a new user
-    await registerUser(req, res);
-});
+// app.post("/register", async (req, res) => {
+//     // Register a new user
+//     await registerUser(req, res);
+// });
 app.post("/login", async (req, res) => {
     // Login a user
     await loginUser(req, res);
@@ -295,58 +295,79 @@ app.get("/emojis", (req, res) => {
 //     // Once Google verifies authorization, it goes to the callback function below
 //     res.redirect(url);
 // });
-// app.get("/auth/google/callback",
-// 	passport.authenticate("google", { failureRedirect: "/" }),
-// 	async (req, res) => {
-//         // Code frmo 5/24 lecture with Dr. Posnett
 
-// 		const googleId = req.user.id;
-// 		const hashedGoogleId = hash(googleId);
+app.get("/auth/google", passport.authenticate('google', { scope: ['profile'] }));
 
-//         // TODO he put this line here, but we don't have a hashedGoogleId line
-//         // TODO but he also uses the userId attribute below so maybe we need both??
-// 		req.session.hashedGoogleId = hashedGoogleId;
+// app.get('/auth/google/callback', 
+//   passport.authenticate('google', { failureRedirect: '/error' }),
+//   function(req, res) {
+//     // Successful authentication, redirect home.
+//     res.redirect('/login');
+//   });
 
-//         // TODO not sure if this is correct but modify as needed
-// //     // TODO hash the user id and then store that instead of directly storing the id
-// //     const user = getCurrentUser();
-// //     const db = await getDbConnection();
 
-// //     if (foundMatches(user)) {
-// //         // TODO update the value in the SQL data base
-// //         const hashedGoogleId = `${userinfo.data.picture}`
-// //         let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
-// //         await db.run(qry, [hashedGoogleId, user.username]);
+// Posnett's callback route with passport
+app.get("/auth/google/callback",
+	passport.authenticate("google", { failureRedirect: "/" }),
+	async (req, res) => {
+        // Code frmo 5/24 lecture with Dr. Posnett
 
-// //         fs.writeFileSync(url, buffer);
-// //     }
+		const googleId = req.user.id;
+		const hashedGoogleId = googleId;
 
-// //     await db.close();
+        // TODO he put this line here, but we don't have a hashedGoogleId line
+        // TODO but he also uses the userId attribute below so maybe we need both??
+		req.session.hashedGoogleId = hashedGoogleId;
+
+        // TODO not sure if this is correct but modify as needed
+//     // TODO hash the user id and then store that instead of directly storing the id
+        const user = await findUserById(googleId);
+        const db = await getDbConnection();
+
+        // if (foundMatches(user)) {
+        //     // TODO update the value in the SQL data base
+        //     // const hashedGoogleId = `${userinfo.data.picture}`
+        //     let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
+        //     await db.run(qry, [hashedGoogleId, user.username]);
+
+        //     fs.writeFileSync(url, buffer);
+        // }
+
+        // await db.close();
 		
-// 		try {
-// 		// looking up in our database, so async
-// 		// make the arrow function async!!! see at the third line of code
-//             const db = await getDbConnection();
+		try {
+		// looking up in our database, so async
+		// make the arrow function async!!! see at the third line of code
+            const db = await getDbConnection();
             
-// 			let localUser = await findUserByHashedGoogleId(hashedGoogleId);
-//             let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
-//             await db.run(qry, [hashedGoogleId, user.username]);
+			let localUser = await findUserByHashedGoogleId(hashedGoogleId);
+            let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
+            console.log(user)
+            await db.run(qry, [hashedGoogleId, user.username]);
 
-// 			if (localUser) {
-// 				req.session.userId = localUser.id;
-// 				req.session.loggedIn = true;
-// 				res.redirect("/");
-// 			} else {
-// 			    res.redirect("/registerUsername");
-// 			}
-//         } catch (err) {
-//             console.error("Error finding user:", err);
-//             res.redirect("/error");
-//         }
+			if (localUser) {
+				req.session.userId = localUser.id;
+				req.session.loggedIn = true;
+				res.redirect("/");
+			} else {
+			    res.redirect("/registerUsername");
+			}
+        } catch (err) {
+            console.error("Error finding user:", err);
+            res.redirect("/error");
+        }
 
-//         await db.close();
-//     }
-// );
+        await db.close();
+    }
+);
+
+app.get("/registerUsername", (req, res) => {
+    res.render("registerUsername", { regError: req.query.error });
+});  
+
+app.post("/registerUsername", async (req, res) => {
+    await registerUsername(req, res);
+});  
 
 // TODO delete this later
 // app.get("/auth/google/callback", async (req, res) => {
@@ -362,16 +383,17 @@ app.get("/emojis", (req, res) => {
 
 //     const userinfo = await oauth2.userinfo.get();
 
-//     res.send(`
-//         <h1>Hello, ${userinfo.data.name}</h1>
-//         <p>Email: ${userinfo.data.email}</p>
-//         <img src="${userinfo.data.picture}" alt="Profile Picture">
-//         <br>
-//         <a href="/logout">Logout from App</a>
-//         <br>
-//     `);
+//     // res.send(`
+//     //     <h1>Hello, ${userinfo.data.name}</h1>
+//     //     <p>Email: ${userinfo.data.email}</p>
+//     //     <img src="${userinfo.data.picture}" alt="Profile Picture">
+//     //     <br>
+//     //     <a href="/logout">Logout from App</a>
+//     //     <br>
+//     // `);
+//     res.render()
 
-//   
+  
 // });
 
 // TODO a href /auth/google
@@ -519,8 +541,8 @@ function isAuthenticated(req, res, next) {
         // Finished processing info, so move on to the actual route function
         next();
     } else {
-        console.log("Redirecting to login...");
-        res.redirect("/login");
+        console.log("Redirecting to home...");
+        res.redirect("/");
     }
 }
 
@@ -551,17 +573,17 @@ function foundMatches(queryRes) {
 }
 
 // Function to register a user
-async function registerUser(req, res) {
+async function registerUsername(req, res) {
     const user = await findUserByUsername(req.body.username);
 
     if (!foundMatches(user)) {
         // Username doesn't exist, so we can register new user and redirect appropriately
         addUser(req.body.username);
         handleAvatar(req, res);
-        res.redirect("/login");
+        res.redirect("/");
     } else {
         // User already exists, so redirect to /register GET endpoint with these parameters
-        res.redirect("/register?error=Username+already+exists");
+        res.redirect("/registerUsername?error=Username+already+exists");
     }    
 }
 
