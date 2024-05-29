@@ -1,0 +1,18 @@
+{{! Use the main layout }}
+{{!< main }}
+
+<section class="register-username">
+    <section class = "register-area">
+        <h2>Register</h2>
+        <!-- errors will appear here -->
+        {{#if regError}}
+            <p style="color: red;">{{regError}}</p>
+        {{/if}}
+        <form action="/registerUsername" method="POST">
+            <!-- Following two lines from 5/15 lecture with Dr. Posnett -->
+            <label for="new-username">Username:</label>
+            <input type="text" id="new-username" name="username" class="gaegu-regular">
+            <button type="submit" class="gaegu-regular">Register</button>
+        </form>
+    </section>
+</section>
