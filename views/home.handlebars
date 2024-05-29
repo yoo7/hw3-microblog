@@ -32,15 +32,14 @@
         <!-- recent posts -->
         <h2>&mdash; {{postNeoType}}s from {{postNeoType}}-Takers &mdash;</h2>
 
-        <button type="button" class="gaegu-regular" onclick="toggleDropdown()">Sort by: Recent</button>
+        <button type="button" id="dropdown" class="gaegu-regular" onclick="toggleDropdown()">Sort Posts</button>
         <ul class="options">
-            <li id="recent" class="selected">Recent</li>
+            <li id="recent">Recent</li>
             <li id="oldest">Oldest</li>
             <li id="most-liked">Most Liked</li>
             <li id="least-liked">Least Liked</li>
         </ul>
 
-        
         <div class="show-posts">
             {{#if posts.length}}
             <ul>
@@ -53,153 +52,144 @@
                 <p>No recent {{toLowerCase postNeoType}}s taken...</p>
             {{/if}}
         </div>
-        
     </section>
 </section>
 
-
-{{! JavaScript for Emoji Integration }}
 <script>
 
-/*
- You want to show a subset of the emojis. About 200. However,
- you also want the user to be able to search all emojis,
- so, put them in this array when the array is empty so 
- that you have them.
-*/
+    /*
+    You want to show a subset of the emojis. About 200. However,
+    you also want the user to be able to search all emojis,
+    so, put them in this array when the array is empty so 
+    that you have them.
+    */
 
-let allEmojis = [];  // Global list to hold all emojis
-const recent = document.getElementById("recent");
-const oldest = document.getElementById("oldest");
-const mostLiked = document.getElementById("most-liked");
-const leastLiked = document.getElementById("least-liked");
+    let allEmojis = [];  // Global list to hold all emojis
 
-oldest.addEventListener("click", changeSort);
-mostLiked.addEventListener("click", changeSort);
-leastLiked.addEventListener("click", changeSort);
+    setSortSelection();
 
-function toggleEmojiPanel() {
-    const container = document.getElementById("emoji-container");
-    container.style.display = container.style.display === "none" ? "block" : "none";
+    function setSortSelection() {
+        const recent = document.getElementById("recent");
+        const oldest = document.getElementById("oldest");
+        const mostLiked = document.getElementById("most-liked");
+        const leastLiked = document.getElementById("least-liked");
 
-    if (container.style.display === "block" && allEmojis.length === 0) {
-        // Fetch emojis, turn the response into JSON, update allEmojis, and display the toggle
-        fetch("/emojis")
-            .then(response => response.json())
-            .then(data => {
-                allEmojis = data;
-                displayEmojis(allEmojis);
-            })
-            .catch(error => {
-                console.error("Error fetching emojis:", error);
-            });
+        recent.addEventListener("click", changeSort);
+        oldest.addEventListener("click", changeSort);
+        mostLiked.addEventListener("click", changeSort);
+        leastLiked.addEventListener("click", changeSort);
+
+        // Determine sortType based on query parameters of current URL
+        let sortType = window.location.search.split("?")
+
+        if (sortType && sortType.length > 1) {
+            sortType = sortType[1].split("=")[1];
+        }
+
+        let newSelected = null;
+
+        if (sortType.length <= 1 || sortType === "recent") {
+            newSelected = document.getElementById("recent");
+        } else {
+            newSelected = document.getElementById(sortType);
+        }
+
+        // Valid sort type
+        if (newSelected) {
+            newSelected.classList.add("selected");
+        }
     }
-}
-
-function displayEmojis(emojis,limit=200) {
-    const container = document.getElementById("emoji-grid");
-    container.innerHTML = '';  // Clear previous results
-
-    if (Array.isArray(emojis) && emojis.length > 0) {
-        emojis.slice(0, limit).forEach(emoji => {
-            const emojiElement = document.createElement("span");
-            emojiElement.textContent = emoji.character;
-            emojiElement.title = emoji.slug;  // Showing the emoji name on hover
-            emojiElement.style.cursor = "pointer";
-            emojiElement.onclick = () => insertEmoji(emoji.character);
-            container.appendChild(emojiElement);
-        });
-    } else {
-        container.textContent = "No emojis found. Try a different search!";
-    }
-}
-
-// Get the emojis whose names contain the substring searchTerm
-function searchEmojis() {
-    const searchTerm = document.getElementById("emoji-search").value.toLowerCase();
-
-    // Look through the array of JS objects -- for each object, check the "slug" attribute
-    // and see if that string contains the searchTerm
-    const filteredEmojis = allEmojis.filter((obj) => obj.slug.includes(searchTerm));
     
-    displayEmojis(filteredEmojis);
-}
 
-// Put emoji on the form
-// Reference: https://stackoverflow.com/a/2345915
-function insertEmoji(emoji) {
-    const textarea = document.getElementById("content");
+    function toggleEmojiPanel() {
+        const container = document.getElementById("emoji-container");
+        container.style.display = container.style.display === "none" ? "block" : "none";
 
-    textarea.focus();  // Keep focus on the textarea
-
-    // Insert the emoji where the user cursor is
-    const i = textarea.selectionStart;
-    const firstSubstr = textarea.value.substring(0, i);
-    const secondSubstr = textarea.value.substring(i);
-
-    textarea.value = firstSubstr + emoji + secondSubstr;
-
-    // Put the user cursor one after the emoji that was just inserted
-    // Remember that emojis are not just one ASCII character
-    textarea.focus();
-    textarea.setSelectionRange(i + emoji.length, i + emoji.length);
-}
-
-function toggleDropdown() {
-    const options = document.getElementsByClassName("options")[0];
-    options.classList.toggle("visible");
-}
-
-
-function changeSort(event) {
-    // No posts anyway
-    if (document.getElementsByClassName("show-posts").length === 0) {
-        return;
-    }
-    const newSelected = event.target;
-
-    if (newSelected.classList.contains("selected")) {
-        // Already using this filter
-        return;
+        if (container.style.display === "block" && allEmojis.length === 0) {
+            // Fetch emojis, turn the response into JSON, update allEmojis, and display the toggle
+            fetch("/emojis")
+                .then(response => response.json())
+                .then(data => {
+                    allEmojis = data;
+                    displayEmojis(allEmojis);
+                })
+                .catch(error => {
+                    console.error("Error fetching emojis:", error);
+                });
+        }
     }
 
-    const currSelected = document.getElementsByClassName("selected")[0];
-    currSelected.classList.remove("selected");
-    currSelected.addEventListener("click", changeSort);
-    newSelected.classList.add("selected");
-    newSelected.removeEventListener("click", changeSort);
+    function displayEmojis(emojis,limit=200) {
+        const container = document.getElementById("emoji-grid");
+        container.innerHTML = '';  // Clear previous results
 
-    let sortedPosts = [];
+        if (Array.isArray(emojis) && emojis.length > 0) {
+            emojis.slice(0, limit).forEach(emoji => {
+                const emojiElement = document.createElement("span");
+                emojiElement.textContent = emoji.character;
+                emojiElement.title = emoji.slug;  // Showing the emoji name on hover
+                emojiElement.style.cursor = "pointer";
+                emojiElement.onclick = () => insertEmoji(emoji.character);
+                container.appendChild(emojiElement);
+            });
+        } else {
+            container.textContent = "No emojis found. Try a different search!";
+        }
+    }
 
-    // Get the newly sorted posts
-    fetch("/sort/" + newSelected.id)
-    .then(response => response.json())
-    .then(data => {
-        sortedPosts = data;
+    // Get the emojis whose names contain the substring searchTerm
+    function searchEmojis() {
+        const searchTerm = document.getElementById("emoji-search").value.toLowerCase();
 
-        // Replace the old post ordering with the new one
-        const posts = document.getElementsByClassName("show-posts")[0];
-        posts.innerHTML = "";  // Clear it
-        console.log("sortedPosts:", sortedPosts);
-
-        posts.innerHTML = `<ul>\{\{#each ${sortedPosts}\}\}
-                                    \{\{> post this user=../user\}\} 
-                            \{\{/each\}\}
-                          </ul>`;
+        // Look through the array of JS objects -- for each object, check the "slug" attribute
+        // and see if that string contains the searchTerm
+        const filteredEmojis = allEmojis.filter((obj) => obj.slug.includes(searchTerm));
         
-        /* TODO
-        const str = "<ul>\{\{#each " + `${sortedPosts}` + `\}\}
-                                    \{\{> post this user=../user\}\} 
-                        \{\{/each\}\}
-                    </ul>`
+        displayEmojis(filteredEmojis);
+    }
 
-        posts.innerHTML = str;
-        */
-    })
-    .catch(error => {
-        console.error("Error changing filter:", error);
-    });
-}
+    // Put emoji on the form
+    // Reference: https://stackoverflow.com/a/2345915
+    function insertEmoji(emoji) {
+        const textarea = document.getElementById("content");
+
+        textarea.focus();  // Keep focus on the textarea
+
+        // Insert the emoji where the user cursor is
+        const i = textarea.selectionStart;
+        const firstSubstr = textarea.value.substring(0, i);
+        const secondSubstr = textarea.value.substring(i);
+
+        textarea.value = firstSubstr + emoji + secondSubstr;
+
+        // Put the user cursor one after the emoji that was just inserted
+        // Remember that emojis are not just one ASCII character
+        textarea.focus();
+        textarea.setSelectionRange(i + emoji.length, i + emoji.length);
+    }
+
+    function toggleDropdown() {
+        const dropdown = document.getElementById("dropdown");
+        const options = document.getElementsByClassName("options")[0];
+        options.classList.toggle("visible");
+    }
+
+
+    function changeSort(event) {
+        // No posts anyway
+        if (document.getElementsByClassName("show-posts").length === 0) {
+            return;
+        }
+        const newSelected = event.target;
+
+        if (newSelected.classList.contains("selected")) {
+            // Already using this filter
+            return;
+        }
+
+        // Reload page with the newly sorted posts
+        window.location.href = "/?sort=" + newSelected.id;
+    }
 
 </script>
 

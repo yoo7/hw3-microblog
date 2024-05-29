@@ -60,7 +60,7 @@ label, input, textarea, .or, .title, nav, button {
     font-size: 20px;
 }
 
-.content, footer {
+.content, footer, .options li {
     font-size: 17px;
 }
 
@@ -224,8 +224,9 @@ input {
     display: none;
 }
 
-.options ul li {
+.options {
     list-style: none;
+    text-align: center;
 }
 
 .options li:hover {
@@ -243,8 +244,21 @@ input {
     flex-direction: column;
 }
 
-.posts-list .show-posts ul, .users-posts ul {
+.posts-list .show-posts ul, .users-posts ul, .options {
     padding-inline-start: 0px;
+}
+
+.show-posts {
+    margin: 2vw auto auto auto;
+}
+
+#dropdown {
+    width: 100px;
+}
+
+.options li {
+    margin: 2px auto;
+    padding: 3px 10px;
 }
 
 .bold {
@@ -306,7 +320,7 @@ input {
     font-size: 2vw;
 }
 
-.login-register button, input {
+.login-register button, input, #dropdown {
     border-radius: 5px;
 }
 
@@ -347,6 +361,7 @@ footer {
         margin: 0;
         padding: 0;
     }
+
     h2 {
         font-size: 5vw;
     }
@@ -379,12 +394,16 @@ footer {
         height: auto;
     }
 
-    label, input, textarea, .or, .title, nav, button {
-        font-size: 5vw;
+    label, input, textarea, .or, .title, nav, button, #dropdown {
+        font-size: 4.5vw;
     }
     
-    .content, footer {
+    .content, footer, .options li {
         font-size: 3.5vw;
+    }
+
+    .options li {
+        padding: 0.5vw 1vw;
     }
 
     .content {
@@ -422,8 +441,8 @@ footer {
         margin: 4vw auto 4vw auto;
     }
     
-    .posts-list ul {
-        margin: 2vw;
+    .show-posts ul {
+        margin: 5vw;
     }
 
     .profile {
@@ -431,7 +450,7 @@ footer {
     }
 
     .profile-avatar img {
-        width: 120px;
+        width: 20vw;
     }
 
     .login-register {
@@ -448,7 +467,7 @@ footer {
         flex-direction: column;
     }
     
-    button {
+    button, #dropdown {
         width: 25vw;
     }
 

@@ -3,6 +3,7 @@
 const express = require("express");
 const expressHandlebars = require("express-handlebars");
 const session = require("express-session");
+
 const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
@@ -136,6 +137,7 @@ app.use(express.urlencoded({ extended: true }));    // Parse URL-encoded bodies 
 app.use(express.json());                            // Parse JSON bodies (as sent by API clients)
 
 // Configure passport
+// TODO
 // passport.use(new GoogleStrategy({
 //     clientID: CLIENT_ID,
 //     clientSecret: CLIENT_SECRET,
@@ -160,7 +162,14 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 // We pass the posts and user variables into the home
 // template
 app.get("/", async (req, res) => {
-    const posts = await getPosts();
+    let sortType = req.query.sort;
+
+    // No sort type was provided, so by default set to "recent"
+    if (!sortType) {
+        sortType = "recent";
+    }
+
+    const posts = await getPosts(sortType);
     const user = await getCurrentUser(req) || {};
 
     // Use home.handlebars
@@ -264,7 +273,7 @@ app.get("/emojis", (req, res) => {
         fetch(url)
             .then(response => response.json())
             .then(data => fs.writeFile("emojis.json", JSON.stringify(data), (error) => error && console.error("Error fetching emojis:", error)))
-            .then(data => sendEmojis(req, res))
+            .then(() => sendEmojis(req, res))
             .catch(error => {
                 console.error("Error fetching emojis:", error);
             });
@@ -272,27 +281,8 @@ app.get("/emojis", (req, res) => {
         // File already exists, so directly send the emojis
         sendEmojis(req, res);
     }
-});
-app.get("/sort/:sortType", async (req, res) => {
-    let sortType = req.params.sortType;
+});   
 
-    if (sortType === "recent") {
-        sortType = "timestamp DESC";
-    } else if (sortType === "oldest") {
-        sortType = "timestamp";  // Ascending
-    } else if (sortType === "most-liked") {
-        sortType = "likes DESC";
-    } else if (sortType === "least-liked") {
-        sortType = "likes";
-    } else {
-        console.error("Unrecognized sort type");
-        return;
-    }
-
-    const posts = await getPosts(sortType);
-    res.send(posts);
-
-});
 // app.get("/auth/google", (req, res) => {
 //     // Code from 5/22 discussion with Zeerak
 //     // Want user email and profile
@@ -725,6 +715,19 @@ async function getCurrentUser(req) {
 async function getPosts(sortType="timestamp DESC") {
     const db = await getDbConnection();
     let rows = null;
+
+    if (sortType === "recent") {
+        sortType = "timestamp DESC";
+    } else if (sortType === "oldest") {
+        sortType = "timestamp";  // Ascending
+    } else if (sortType === "most-liked") {
+        sortType = "likes DESC";
+    } else if (sortType === "least-liked") {
+        sortType = "likes";
+    } else {
+        console.error("Unrecognized sort type");
+        return null;
+    }
 
     try {
         let qry = `SELECT * FROM posts ORDER BY ${sortType}`;
