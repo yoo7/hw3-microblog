@@ -16,7 +16,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
 
-const bcrypt = require("bcrypt");
+const crypto = require('crypto');
 
 const API_KEY = process.env.API_KEY;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -697,10 +697,8 @@ function generateAvatar(letter, width = 100, height = 100) {
 }
 
 async function hashId(idToHash) {
-    const saltRounds = 10;
-
     try{
-        const hashedId = await bcrypt.hash(idToHash, saltRounds);
+        const hashedId = await crypto.createHash('sha256').update(idToHash).digest('hex');
         return hashedId;
     } catch (err) {
         console.log("Error: ", err);
