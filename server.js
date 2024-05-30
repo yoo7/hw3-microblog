@@ -14,7 +14,7 @@ require("dotenv").config();
 const { google } = require("googleapis");
 const { OAuth2Client } = require("google-auth-library");
 
-const passport = require('passport');
+const passport = require("passport");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const sqlite3 = require("sqlite3");
@@ -84,22 +84,6 @@ app.engine(
                 }
 
                 return true;
-
-                // const db = await getDbConnection();
-
-                // let qry = "SELECT * FROM posts WHERE id=?";
-                // let row = await db.get(qry, [postId]);
-                // let str = row.likedBy;
-                // console.log("(postId, username, str):", postId, username, str);
-
-                // await db.close();
-
-                // if (str === null || str === undefined || str === "" || !str.includes(username)) {
-                //     console.log("hasn't been liked yet");
-                //     return false;
-                // }
-
-                // return true;
             },
         },
     })
@@ -184,7 +168,7 @@ app.get("/", async (req, res) => {
 // });
 
 // Login route GET route is used for error response from login
-//
+// TODO can delete this
 app.get("/login", (req, res) => {
     // Error message is whatever the query string value is
     res.render("loginRegister", { loginError: req.query.error });
@@ -310,93 +294,39 @@ app.get("/auth/google", passport.authenticate('google', { scope: ['profile'] }))
 app.get("/auth/google/callback",
 	passport.authenticate("google", { failureRedirect: "/" }),
 	async (req, res) => {
-        // Code frmo 5/24 lecture with Dr. Posnett
+        // Code from 5/24 lecture with Dr. Posnett
 
+        // Hash the user id and then store that instead of directly storing the id
 		const googleId = req.user.id;
-		const hashedGoogleId = googleId;
+		const hashedGoogleId = googleId;  // TODO hash this
 
-        // TODO he put this line here, but we don't have a hashedGoogleId line
-        // TODO but he also uses the userId attribute below so maybe we need both??
+        // Store hashed version in the session since we successfully authenticated
 		req.session.hashedGoogleId = hashedGoogleId;
 
-        // TODO not sure if this is correct but modify as needed
-//     // TODO hash the user id and then store that instead of directly storing the id
-        const user = await findUserById(googleId);
-        const db = await getDbConnection();
-
-        // if (foundMatches(user)) {
-        //     // TODO update the value in the SQL data base
-        //     // const hashedGoogleId = `${userinfo.data.picture}`
-        //     let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
-        //     await db.run(qry, [hashedGoogleId, user.username]);
-
-        //     fs.writeFileSync(url, buffer);
-        // }
-
-        // await db.close();
-		
 		try {
-		// looking up in our database, so async
-		// make the arrow function async!!! see at the third line of code
-            const db = await getDbConnection();
-            
-			let localUser = await findUserByHashedGoogleId(hashedGoogleId);
-            let qry = "UPDATE users SET hashedGoogleId = ? WHERE username = ?";
-            console.log(user)
-            await db.run(qry, [hashedGoogleId, user.username]);
+            const user = await findUserByHashedGoogleId(hashedGoogleId);
 
-			if (localUser) {
-				req.session.userId = localUser.id;
+            if (user) {
+                req.session.userId = user.id;
 				req.session.loggedIn = true;
 				res.redirect("/");
-			} else {
-			    res.redirect("/registerUsername");
-			}
+            } else {
+                res.redirect("/registerUsername");
+            }
         } catch (err) {
             console.error("Error finding user:", err);
             res.redirect("/error");
         }
-
-        await db.close();
     }
 );
 
-app.get("/registerUsername", (req, res) => {
+app.get("/registerUsername", (req, res) => {;
     res.render("registerUsername", { regError: req.query.error });
 });  
 
 app.post("/registerUsername", async (req, res) => {
     await registerUsername(req, res);
 });  
-
-// TODO delete this later
-// app.get("/auth/google/callback", async (req, res) => {
-//     // Code from 5/22 discussion with Zeerak
-//     const { code } = req.query;
-//     const { tokens } = await client.getToken(code);
-//     client.setCredentials(tokens);
-
-//     const oauth2 = google.oauth2({
-//         auth: client,
-//         version: "v2",
-//     });
-
-//     const userinfo = await oauth2.userinfo.get();
-
-//     // res.send(`
-//     //     <h1>Hello, ${userinfo.data.name}</h1>
-//     //     <p>Email: ${userinfo.data.email}</p>
-//     //     <img src="${userinfo.data.picture}" alt="Profile Picture">
-//     //     <br>
-//     //     <a href="/logout">Logout from App</a>
-//     //     <br>
-//     // `);
-//     res.render()
-
-  
-// });
-
-// TODO a href /auth/google
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Server Activation
@@ -520,14 +450,12 @@ function getCurrTime() {
 }
 
 // Function to add a new user to the users array
-async function addUser(username) {
+async function addUser(username, hashedGoogleId) {
     const db = await getDbConnection();
 
-
     try {
-        // TODO: Need google hashed id here too
         let qry = "INSERT INTO users(username, hashedGoogleId, memberSince) VALUES(?, ?, ?)";
-        let row = await db.run(qry, [username, req.session.hashedGoogleId, getCurrTime()]);
+        await db.run(qry, [username, hashedGoogleId, getCurrTime()]);
     } catch (error) {
         console.error("Error:", error);
     }
@@ -567,6 +495,7 @@ function isEmptyArr(arr) {
     return Array.isArray(arr) && arr.length > 0;
 }
 
+// TODO maybe delete
 function foundMatches(queryRes) {
     // Valid return result from the query string -- a nonempty object or a nonempty array
     return queryRes && (queryRes !== undefined) && (queryRes !== null) && (!isEmptyObj(queryRes) || !isEmptyArr(queryRes));
@@ -574,35 +503,41 @@ function foundMatches(queryRes) {
 
 // Function to register a user
 async function registerUsername(req, res) {
-    const user = await findUserByUsername(req.body.username);
+    let user = await findUserByUsername(req.body.username);
 
-    if (!foundMatches(user)) {
-        // Username doesn't exist, so we can register new user and redirect appropriately
-        addUser(req.body.username);
-        handleAvatar(req, res);
-        res.redirect("/");
-    } else {
+    if (user) {
         // User already exists, so redirect to /register GET endpoint with these parameters
         res.redirect("/registerUsername?error=Username+already+exists");
+    } else {
+        // Username doesn't exist, so we can register new user and redirect appropriately
+        await addUser(req.body.username, req.session.hashedGoogleId);
+        handleAvatar(req, res);
+
+        user = await findUserByUsername(req.body.username);
+        console.log(user);
+        req.session.userId = user.id;
+        req.session.loggedIn = true;
+        res.redirect("/");
     }    
 }
 
-// Function to login a user
-async function loginUser(req, res) {
-    const user = await findUserByUsername(req.body.username);
+// TODO I don't think we need this function anymore?
+// // Function to login a user
+// async function loginUser(req, res) {
+//     const user = await findUserByUsername(req.body.username);
 
-    // User exists
-    if (foundMatches(user)) {
-        // Login user and redirect
-        req.session.userId = user.id;
-        req.session.loggedIn = true;
+//     // User exists
+//     if (foundMatches(user)) {
+//         // Login user and redirect
+//         req.session.userId = user.id;
+//         req.session.loggedIn = true;
 
-        res.redirect("/");
-    } else {
-        // Redirect to the /login GET endpoint with these parameters
-        res.redirect("/login?error=Invalid+username");
-    }
-}
+//         res.redirect("/");
+//     } else {
+//         // Redirect to the /login GET endpoint with these parameters
+//         res.redirect("/login?error=Invalid+username");
+//     }
+// }
 
 // Function to logout a user
 // Code from 5/17 lecture from Dr. Posnett
