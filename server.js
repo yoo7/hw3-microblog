@@ -20,6 +20,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
 
+const bcrypt = require("bcrypt");
+
 const API_KEY = process.env.API_KEY;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
@@ -298,7 +300,7 @@ app.get("/auth/google/callback",
 
         // Hash the user id and then store that instead of directly storing the id
 		const googleId = req.user.id;
-		const hashedGoogleId = googleId;  // TODO hash this
+		const hashedGoogleId = hashId(googleId);
 
         // Store hashed version in the session since we successfully authenticated
 		req.session.hashedGoogleId = hashedGoogleId;
@@ -754,4 +756,16 @@ function generateAvatar(letter, width = 100, height = 100) {
 
     // 5. Return the avatar as a PNG buffer
     return canvasImg.toBuffer("image/png");
+}
+
+async function hashId(idToHash) {
+    const saltRounds = 10;
+
+    try{
+        const hashedId = await bcrypt.hash(idToHash, saltRounds);
+    } catch (err) {
+        console.log("Error: ", err);
+    }
+    
+    return hashedId;
 }
