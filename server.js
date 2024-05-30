@@ -11,12 +11,12 @@ const path = require("path");
 require("dotenv").config();
 
 const passport = require("passport");
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
 
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 const API_KEY = process.env.API_KEY;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -186,10 +186,6 @@ app.get("/avatar/:username", (req, res) => {
 
     // Send the image back as a response
     res.sendFile(path.join(__dirname, username));
-});
-app.post("/login", async (req, res) => {
-    // Login a user
-    await loginUser(req, res);
 });
 app.get("/logout", isAuthenticated, (req, res) => {
     logoutUser(req, res);
@@ -440,7 +436,7 @@ async function registerUsername(req, res) {
     let user = await findUserByUsername(req.body.username);
 
     if (user) {
-        // User already exists, so redirect to /register GET endpoint with these parameters
+        // User already exists, so redirect to /registerUsername GET endpoint with these parameters
         res.redirect("/registerUsername?error=Username+already+exists");
     } else {
         // Username doesn't exist, so we can register new user and redirect appropriately
@@ -565,7 +561,6 @@ async function handleAvatar(req, res) {
         const url = `public/images/${username}`;
         const avatar_url = `/images/${username}`;
 
-        // TODO remove/update eventually when we have the Google OAuth stuff...
         let qry = "UPDATE users SET avatar_url = ? WHERE username = ?";
         await db.run(qry, [avatar_url, username]);
 
@@ -673,7 +668,7 @@ function generateAvatar(letter, width = 100, height = 100) {
 
 async function hashId(idToHash) {
     try{
-        const hashedId = await crypto.createHash('sha256').update(idToHash).digest('hex');
+        const hashedId = await crypto.createHash("sha256").update(idToHash).digest("hex");
         return hashedId;
     } catch (err) {
         console.log("Error: ", err);
