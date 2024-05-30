@@ -239,8 +239,10 @@ app.get("/emojis", (req, res) => {
         // File already exists, so directly send the emojis
         sendEmojis(req, res);
     }
-});   
+});
+
 app.get("/auth/google", passport.authenticate('google', { scope: ['profile'] }));
+
 // Posnett's callback route with passport
 app.get("/auth/google/callback",
 	passport.authenticate("google", { failureRedirect: "/" }),
@@ -249,7 +251,8 @@ app.get("/auth/google/callback",
 
         // Hash the user id and then store that instead of directly storing the id
 		const googleId = req.user.id;
-		const hashedGoogleId = hashId(googleId);
+
+		const hashedGoogleId = await hashId(googleId);
 
         // Store hashed version in the session since we successfully authenticated
 		req.session.hashedGoogleId = hashedGoogleId;
@@ -432,33 +435,6 @@ function isAuthenticated(req, res, next) {
     }
 }
 
-function isEmptyObj(obj) {
-    // Not an object
-    if (typeof queryRes !== 'object') {
-        return false;
-    }
-
-    // Check if it contains the key property
-    for (let key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            return false;
-        }
-    }
-
-    // Did not find any of the keys, so it's an empty object
-    return true;
-}
-
-function isEmptyArr(arr) {
-    return Array.isArray(arr) && arr.length > 0;
-}
-
-// TODO maybe delete
-function foundMatches(queryRes) {
-    // Valid return result from the query string -- a nonempty object or a nonempty array
-    return queryRes && (queryRes !== undefined) && (queryRes !== null) && (!isEmptyObj(queryRes) || !isEmptyArr(queryRes));
-}
-
 // Function to register a user
 async function registerUsername(req, res) {
     let user = await findUserByUsername(req.body.username);
@@ -472,7 +448,6 @@ async function registerUsername(req, res) {
         handleAvatar(req, res);
 
         user = await findUserByUsername(req.body.username);
-        console.log(user);
         req.session.userId = user.id;
         req.session.loggedIn = true;
         res.redirect("/");
