@@ -162,8 +162,6 @@ app.get("/error", async (req, res) => {
     res.render("error", { user: user });
 });
 
-// Additional routes that you must implement
-
 app.post("/posts", isAuthenticated, async (req, res) => {
     // Add new post and redirect to home
     // Corresponds with the code that uses the form method in home.handlebars
@@ -242,9 +240,7 @@ app.get("/emojis", (req, res) => {
         sendEmojis(req, res);
     }
 });   
-
 app.get("/auth/google", passport.authenticate('google', { scope: ['profile'] }));
-
 // Posnett's callback route with passport
 app.get("/auth/google/callback",
 	passport.authenticate("google", { failureRedirect: "/" }),
@@ -274,17 +270,20 @@ app.get("/auth/google/callback",
         }
     }
 );
-
 app.get("/googleLogout", (req, res) => {
-    res.render("googleLogout");
+    logoutUser(req, res);
 })
-
 app.get("/registerUsername", (req, res) => {
     res.render("registerUsername", { regError: req.query.error });
 });  
-
 app.post("/registerUsername", async (req, res) => {
     await registerUsername(req, res);
+});  
+app.get("/logoutIFrame", (req, res) => {
+    res.render("logoutIFrame", { regError: req.query.error });
+});  
+app.get("/logoutCallback", (req, res) => {
+    res.render("googleLogout", { regError: req.query.error });
 });  
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -480,24 +479,6 @@ async function registerUsername(req, res) {
     }    
 }
 
-// TODO I don't think we need this function anymore?
-// // Function to login a user
-// async function loginUser(req, res) {
-//     const user = await findUserByUsername(req.body.username);
-
-//     // User exists
-//     if (foundMatches(user)) {
-//         // Login user and redirect
-//         req.session.userId = user.id;
-//         req.session.loggedIn = true;
-
-//         res.redirect("/");
-//     } else {
-//         // Redirect to the /login GET endpoint with these parameters
-//         res.redirect("/login?error=Invalid+username");
-//     }
-// }
-
 // Function to logout a user
 // Code from 5/17 lecture from Dr. Posnett
 function logoutUser(req, res) {
@@ -508,7 +489,7 @@ function logoutUser(req, res) {
             res.redirect("/error");
         } else {
             // Successful logout
-            res.redirect("/googleLogout");
+            res.redirect("/logoutIFrame");
         }
     });
 }
@@ -720,9 +701,8 @@ async function hashId(idToHash) {
 
     try{
         const hashedId = await bcrypt.hash(idToHash, saltRounds);
+        return hashedId;
     } catch (err) {
         console.log("Error: ", err);
     }
-    
-    return hashedId;
 }
