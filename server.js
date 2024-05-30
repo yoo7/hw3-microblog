@@ -10,10 +10,6 @@ const path = require("path");
 
 require("dotenv").config();
 
-// TODO maybe we don't need these two anymore?
-const { google } = require("googleapis");
-const { OAuth2Client } = require("google-auth-library");
-
 const passport = require("passport");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
@@ -25,8 +21,6 @@ const bcrypt = require("bcrypt");
 const API_KEY = process.env.API_KEY;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
-const client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Configuration and Setup
@@ -123,7 +117,6 @@ app.use(express.urlencoded({ extended: true }));    // Parse URL-encoded bodies 
 app.use(express.json());                            // Parse JSON bodies (as sent by API clients)
 
 // Configure passport
-// TODO
 passport.use(new GoogleStrategy({
     clientID: CLIENT_ID,
     clientSecret: CLIENT_SECRET,
@@ -162,22 +155,7 @@ app.get("/", async (req, res) => {
     res.render("home", { posts, user });
 });
 
-// Register GET route is used for error response from registration
-//
-// app.get("/register", (req, res) => {
-//     // Error message is whatever the query string value is
-//     res.render("loginRegister", { regError: req.query.error });
-// });
-
-// Login route GET route is used for error response from login
-// TODO can delete this
-app.get("/login", (req, res) => {
-    // Error message is whatever the query string value is
-    res.render("loginRegister", { loginError: req.query.error });
-});
-
 // Error route: render error page
-//
 app.get("/error", async (req, res) => {
     const user = await getCurrentUser(req);
     
@@ -211,10 +189,6 @@ app.get("/avatar/:username", (req, res) => {
     // Send the image back as a response
     res.sendFile(path.join(__dirname, username));
 });
-// app.post("/register", async (req, res) => {
-//     // Register a new user
-//     await registerUser(req, res);
-// });
 app.post("/login", async (req, res) => {
     // Login a user
     await loginUser(req, res);
@@ -269,28 +243,7 @@ app.get("/emojis", (req, res) => {
     }
 });   
 
-// app.get("/auth/google", (req, res) => {
-//     // Code from 5/22 discussion with Zeerak
-//     // Want user email and profile
-//     const url = client.generateAuthUrl({
-//         access_type: "offline",
-//         scope: ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
-//     });
-
-//     // Go to the callback function
-//     // Once Google verifies authorization, it goes to the callback function below
-//     res.redirect(url);
-// });
-
 app.get("/auth/google", passport.authenticate('google', { scope: ['profile'] }));
-
-// app.get('/auth/google/callback', 
-//   passport.authenticate('google', { failureRedirect: '/error' }),
-//   function(req, res) {
-//     // Successful authentication, redirect home.
-//     res.redirect('/login');
-//   });
-
 
 // Posnett's callback route with passport
 app.get("/auth/google/callback",
@@ -322,7 +275,11 @@ app.get("/auth/google/callback",
     }
 );
 
-app.get("/registerUsername", (req, res) => {;
+app.get("/googleLogout", (req, res) => {
+    res.render("googleLogout");
+})
+
+app.get("/registerUsername", (req, res) => {
     res.render("registerUsername", { regError: req.query.error });
 });  
 
@@ -551,7 +508,7 @@ function logoutUser(req, res) {
             res.redirect("/error");
         } else {
             // Successful logout
-            res.redirect("/");
+            res.redirect("/googleLogout");
         }
     });
 }
