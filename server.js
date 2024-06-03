@@ -176,9 +176,9 @@ app.post("/like/:id", isAuthenticated, (req, res) => {
     // Update post likes
     updatePostLikes(req, res);
 });
-app.get("/profile", isAuthenticated, (req, res) => {
+app.get("/profile/", isAuthenticated, async (req, res) => {
     // Using the middleware isAuthenticated, which executes before the actual route function
-    renderProfile(req, res);
+    await renderProfile(req, res);
 });
 app.get("/avatar/:username", (req, res) => {
     // Serve the avatar image for the user
@@ -283,7 +283,43 @@ app.get("/logoutIFrame", (req, res) => {
 });  
 app.get("/logoutCallback", (req, res) => {
     res.render("googleLogout", { regError: req.query.error });
-});  
+});
+app.post("/changeUser", async (req, res) => {
+    const newUser = await findUserByUsername(req.body.username);
+    const currUser = await getCurrentUser(req);
+
+    if (newUser) {
+        // User already exists, so redirect to /registerUsername GET endpoint with these parameters
+        res.redirect(`/profile?error=Username+already+exists`);
+    } else {
+        // Username doesn't exist, so we can register new user and redirect appropriately
+        const db = await getDbConnection();
+        const newUsername = req.body.username;
+    
+        try {
+            // Update username in users table
+            let qry = "UPDATE users SET username=? WHERE username=?";
+            await db.run(qry, [newUsername, currUser.username]);
+
+            // Update the name associated with their posts
+            qry = "UPDATE posts SET username=? WHERE username=?";
+            await db.run(qry, [newUsername, currUser.username]);
+
+            // Generate new avatar and delete old avatar
+            handleAvatar(req, res);
+            fs.unlink(path.join("public", currUser.avatar_url),  (err) => {
+                if (err) {
+                    console.error("Error:", err);
+                }
+            });
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    
+        await db.close();
+        res.redirect(`/profile`);
+    } 
+});
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Server Activation
@@ -468,10 +504,18 @@ function logoutUser(req, res) {
 // Function to render the profile page
 async function renderProfile(req, res) {
     // Fetch user posts and render the profile page
-    const user = await getCurrentUser(req);
-    const usersPosts = await findPostsByUser(user.username);
+    let username = req.params.username;
+
+    if (username !== undefined) {
+        // Didn't provide route parameter, so default to current user
+        username = getCurrentUser(req).username;
+    }
     
-    res.render("profile", { posts: usersPosts, user: user })
+    const user = await findPostsByUser(username);
+    const usersPosts = await findPostsByUser(username);
+
+    console.log("user:", user);
+    res.render("profile", { regError: req.query.error, posts: usersPosts, user: user });
 }
 
 function updateLikes(currUsername, postLikes, likedBy) {
@@ -558,8 +602,8 @@ async function handleAvatar(req, res) {
 
     if (username) {
         const buffer = generateAvatar(username[0]);
-        const url = `public/images/${username}`;
-        const avatar_url = `/images/${username}`;
+        const url = path.join("public", "images", username);
+        const avatar_url = path.join("images", username);
 
         let qry = "UPDATE users SET avatar_url = ? WHERE username = ?";
         await db.run(qry, [avatar_url, username]);

@@ -19,6 +19,20 @@
             <p><span class="bold gaegu-class">Username:</span> {{user.username}}</p>
             <p><span class="bold gaegu-class">Member Since:</span> {{user.memberSince}}</p>
         </section>
+
+        <section class="user-change">
+            <h2>Change Username</h2>
+            <!-- errors will appear here -->
+            {{#if regError}}
+                <p style="color: red;">{{regError}}</p>
+            {{/if}}
+            <form action="/changeUser" method="POST">
+                <!-- Following two lines from 5/15 lecture with Dr. Posnett -->
+                <label for="new-username">New Username:</label>
+                <input type="text" id="new-username" name="username" class="gaegu-regular">
+                <button type="submit" class="gaegu-regular">Submit</button>
+            </form>
+        </section>
     </div>
 </section>
 
