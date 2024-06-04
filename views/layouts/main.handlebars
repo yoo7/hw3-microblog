@@ -17,7 +17,7 @@
 <body class="gaegu-regular">
     <header>
         <div class="logo">
-            <a href="/"><img src="images/logo.png" class="header-logo" alt="website logo" title="logo"></a>
+            <a href="/"><img src="/images/logo.png" class="header-logo" alt="website logo" title="logo"></a>
             <h1><a href="/">{{{appName}}}</a></h1>
         </div>
         <nav>
@@ -32,7 +32,7 @@
                         <img src="{{#if currentUser.avatar_url}}
                                         {{currentUser.avatar_url}}
                                     {{else}}
-                                        images/{{currentUser.username}}
+                                        /images/{{currentUser.username}}
                                     {{/if}}" 
                                     alt="User Avatar" 
                                     class="header-avatar">

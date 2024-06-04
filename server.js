@@ -184,7 +184,6 @@ app.get("/profile", isAuthenticated, async (req, res) => {
 
 app.get("/profile/:username", isAuthenticated, async (req, res) => {
     // Using the middleware isAuthenticated, which executes before the actual route function
-    console.log(req.params.username)
     await renderProfile(req, res);
 });
 
@@ -630,7 +629,7 @@ async function handleAvatar(req, res) {
     if (username) {
         const buffer = generateAvatar(username[0]);
         const url = path.join("public", "images", username);
-        const avatar_url = path.join("images", username);
+        const avatar_url = path.join("/", "images", username);
 
         let qry = "UPDATE users SET avatar_url = ? WHERE username = ?";
         await db.run(qry, [avatar_url, username]);
