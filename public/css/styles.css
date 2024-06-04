@@ -190,7 +190,7 @@ input {
     justify-content: space-evenly;
 }
 
-.form-actions button {
+#bio-actions button {
     width: 20vw;
     padding: auto 2vw;
 }

@@ -51,7 +51,7 @@
                 <form action="/bio" method="POST">
                     <textarea class="gaegu-regular" id="content" name="content" required=false placeholder="Say something about yourself!">{{user.bio}}</textarea>
 
-                    <div class="form-actions">
+                    <div class="form-actions" id="bio-buttons">
                         <button type="button" class="gaegu-regular" onclick="toggleEmojiPanel()">😀</button>
                         <button type="button" class="gaegu-regular" onclick="editBio()">CANCEL</button>
                         <button type="submit" class="gaegu-regular">FINISH</button>

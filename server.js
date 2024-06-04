@@ -176,12 +176,6 @@ app.post("/like/:id", isAuthenticated, (req, res) => {
     // Update post likes
     updatePostLikes(req, res);
 });
-// TODO
-app.get("/profile", isAuthenticated, async (req, res) => {
-    // Using the middleware isAuthenticated, which executes before the actual route function
-    await renderProfile(req, res);
-});
-
 app.get("/profile/:username", isAuthenticated, async (req, res) => {
     // Using the middleware isAuthenticated, which executes before the actual route function
     await renderProfile(req, res);
@@ -531,14 +525,7 @@ function logoutUser(req, res) {
 
 // Function to render the profile page
 async function renderProfile(req, res) {
-    let user = null;
-    const currUser = await getCurrentUser(req);
-
-    if (req.params !== undefined && req.params.username !== undefined) {
-        user = await findUserByUsername(req.params.username);
-    } else {
-        user = await getCurrentUser(req);  // Default
-    }
+    const user = await findUserByUsername(req.params.username);
     const usersPosts = await findPostsByUser(user.username);
 
     res.render("profile", { regError: req.query.error, posts: usersPosts, user: user , currentUser: currUser});
