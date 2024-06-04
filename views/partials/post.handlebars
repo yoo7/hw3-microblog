@@ -2,13 +2,16 @@
 <div class="post">
     <div class="post-avatar">
         <!-- Conditional rendering based on variables -->
-        <img src="{{#if this.avatar_url}}
+        <a href="/profile/{{this.username}}">
+            <img src="{{#if this.avatar_url}}
                         {{this.avatar_url}}
                     {{else}}
                         ../../images/{{this.username}}
                     {{/if}}" 
                     alt="User Avatar" 
                     class="header-avatar">
+        </a>
+        
         
         <span class="title gaegu-regular bold">{{this.title}}</span>
     </div>
@@ -17,7 +20,7 @@
         <!-- the post -->
         <div class="post-status-bar">
            <!-- Determine whether to show like button OR the trashcan depending on the user-->
-            {{#ifCond this.username user.username}}
+            {{#ifCond user currentUser}}
                 <div class="delete">
                     <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
                     <div class="num-likes">
