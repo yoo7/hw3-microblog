@@ -56,11 +56,16 @@ h2 {
     text-align: center;
 }
 
-label, input, textarea, .or, .title, nav, button {
+h3 {
+    font-size: 25px;
+    text-align: center;
+}
+
+label, input, textarea, #actual-bio, .or, .title, nav, button {
     font-size: 20px;
 }
 
-.content, footer, .options li {
+.content, footer, .options li, p {
     font-size: 17px;
 }
 
@@ -166,8 +171,12 @@ input {
     width: 100%;
 }
 
+#bio-edit {
+    width: 40vw;
+}
+
 #emoji-grid {
-    height: 15em;
+    height: fit-content;
     border: solid black;
     border-width: thin;
 }
@@ -179,6 +188,11 @@ input {
 .form-actions {
     display: flex;
     justify-content: space-evenly;
+}
+
+.form-actions button {
+    width: 20vw;
+    padding: auto 2vw;
 }
 
 .post {
@@ -239,9 +253,58 @@ input {
     cursor: default;
 }
 
+.bold {
+    font-weight: bold;
+}
+
+.profile {
+    display: flex;
+    justify-content: space-evenly;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+    margin: 5vw auto 3vw auto;
+}
+
+.profile-container, #actual-bio {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+#actual-bio button {
+    margin: 2vw auto auto auto;
+    width: 70px;
+}
+
+#bio-edit {
+    display: none;
+}
+
+#bio-edit button {
+    width: 25%;
+}
+
+.profile-info {
+    margin: 0px auto 0px auto;
+    padding: 0px;
+    font-size: 20px;
+}
+
+.profile-info p {
+    margin: 12px;
+}
+
 .visible {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
 }
 
 .posts-list .show-posts ul, .users-posts ul, .options {
@@ -259,37 +322,6 @@ input {
 .options li {
     margin: 2px auto;
     padding: 3px 10px;
-}
-
-.bold {
-    font-weight: bold;
-}
-
-.profile {
-    display: flex;
-    justify-content: space-evenly;
-    justify-items: center;
-    align-content: center;
-    align-items: center;
-}
-
-.profile-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    justify-items: center;
-    align-content: center;
-    align-items: center;
-}
-
-.profile-info {
-    margin: 0px auto 0px auto;
-    padding: 0px;
-    font-size: 20px;
-}
-
-.profile-info p {
-    margin: 12px;
 }
 
 .title {
@@ -366,6 +398,10 @@ footer {
         font-size: 5vw;
     }
 
+    h3 {
+        font-size: 3.5vw;
+    }
+
     .logo {
         display: flex;
         justify-content: center;
@@ -394,11 +430,11 @@ footer {
         height: auto;
     }
 
-    label, input, textarea, .or, .title, nav, button, #dropdown {
+    label, input, textarea, #actual-bio .or, .title, nav, button, #dropdown {
         font-size: 4.5vw;
     }
     
-    .content, footer, .options li {
+    .content, footer, .options li, p {
         font-size: 3.5vw;
     }
 
@@ -440,6 +476,14 @@ footer {
         width: 80%;
         margin: 4vw auto 4vw auto;
     }
+
+    #actual-bio button {
+        width: 15vw;
+    }
+
+    #bio-edit {
+        width: 90%;
+    }
     
     .show-posts ul {
         margin: 5vw;
@@ -452,6 +496,7 @@ footer {
     .profile-avatar img {
         width: 20vw;
     }
+
 
     .login-register {
         flex-direction: column;

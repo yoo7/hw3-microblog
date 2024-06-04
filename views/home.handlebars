@@ -55,6 +55,7 @@
     </section>
 </section>
 
+
 <script>
 
     /*
@@ -99,7 +100,25 @@
             newSelected.classList.add("selected");
         }
     }
-    
+
+    function changeSort(event) {
+        // No posts anyway
+        if (document.getElementsByClassName("show-posts").length === 0) {
+            return;
+        }
+        const newSelected = event.target;
+
+        if (newSelected.classList.contains("selected")) {
+            // Already using this filter
+            return;
+        }
+
+        // Reload page with the newly sorted posts
+        window.location.href = "/?sort=" + newSelected.id;
+    }
+
+    // TODO make a src to emojis.js with belo since same code as in home
+    let allEmojis = [];  // Global list to hold all emojis
 
     function toggleEmojiPanel() {
         const container = document.getElementById("emoji-container");
@@ -172,23 +191,6 @@
         const dropdown = document.getElementById("dropdown");
         const options = document.getElementsByClassName("options")[0];
         options.classList.toggle("visible");
-    }
-
-
-    function changeSort(event) {
-        // No posts anyway
-        if (document.getElementsByClassName("show-posts").length === 0) {
-            return;
-        }
-        const newSelected = event.target;
-
-        if (newSelected.classList.contains("selected")) {
-            // Already using this filter
-            return;
-        }
-
-        // Reload page with the newly sorted posts
-        window.location.href = "/?sort=" + newSelected.id;
     }
 
 </script>

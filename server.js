@@ -176,7 +176,8 @@ app.post("/like/:id", isAuthenticated, (req, res) => {
     // Update post likes
     updatePostLikes(req, res);
 });
-app.get("/profile/", isAuthenticated, async (req, res) => {
+// TODO
+app.get("/profile", isAuthenticated, async (req, res) => {
     // Using the middleware isAuthenticated, which executes before the actual route function
     await renderProfile(req, res);
 });
@@ -284,7 +285,7 @@ app.get("/logoutIFrame", (req, res) => {
 app.get("/logoutCallback", (req, res) => {
     res.render("googleLogout", { regError: req.query.error });
 });
-app.post("/changeUser", async (req, res) => {
+app.post("/changeUser", isAuthenticated, async (req, res) => {
     const newUser = await findUserByUsername(req.body.username);
     const currUser = await getCurrentUser(req);
 
@@ -317,8 +318,29 @@ app.post("/changeUser", async (req, res) => {
         }
     
         await db.close();
+
+        // TODO
         res.redirect(`/profile`);
     } 
+});
+app.post("/bio", isAuthenticated, async (req, res) => {
+    const bio = req.body.content;
+    const user = await findUserById(req.session.userId);
+
+    const db = await getDbConnection();
+
+    try {
+        // Update bio
+        let qry = "UPDATE users SET bio=? WHERE username=?";
+        await db.run(qry, [bio, user.username]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+
+    await db.close();
+
+    // TODO
+    res.redirect(`/profile`);
 });
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -503,18 +525,16 @@ function logoutUser(req, res) {
 
 // Function to render the profile page
 async function renderProfile(req, res) {
-    // Fetch user posts and render the profile page
-    let username = req.params.username;
+    let user = null;
 
-    if (username !== undefined) {
-        // Didn't provide route parameter, so default to current user
-        username = getCurrentUser(req).username;
+    if (req.params !== undefined && req.params.length > 0 && req.params.username !== undefined) {
+        user = await findUserByUsername(req.params.username);
+    } else {
+        user = await getCurrentUser(req);  // Default
     }
-    
-    const user = await findPostsByUser(username);
-    const usersPosts = await findPostsByUser(username);
 
-    console.log("user:", user);
+    const usersPosts = await findPostsByUser(user.username);
+
     res.render("profile", { regError: req.query.error, posts: usersPosts, user: user });
 }
 
