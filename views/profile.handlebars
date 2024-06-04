@@ -20,26 +20,31 @@
             <p><span class="bold gaegu-class">Member Since:</span> {{user.memberSince}}</p>
         </section>
 
+        
         <section class="user-change">
+            {{#ifCond user currentUser}}
             <h2>&mdash; Change Username &mdash;</h2>
             <!-- errors will appear here -->
             {{#if regError}}
                 <p style="color: red;">{{regError}}</p>
             {{/if}}
-            <form action="/changeUser" method="POST">
+                <form action="/changeUser" method="POST">
                 <!-- Following two lines from 5/15 lecture with Dr. Posnett -->
                 <label for="new-username">New Name:</label>
                 <input type="text" id="new-username" name="username" class="gaegu-regular">
                 <button type="submit" class="gaegu-regular">Submit</button>
             </form>
+            {{/ifCond}}
         </section>
+        
 
         <section class="bio">
             <h2>&mdash; Bio &mdash;</h2>
             <div id="actual-bio">
                 <p>{{user.bio}}</p>
-
-                <button type="button" class="gaegu-regular" onclick="editBio()">EDIT</button>
+                {{#ifCond user currentUser}}
+                    <button type="button" class="gaegu-regular" onclick="editBio()">EDIT</button>
+                {{/ifCond}}
             </div>
 
             <div class="post-form" id="bio-edit">
@@ -68,8 +73,11 @@
 
 <section class="user-posts">
     <!-- you can call posts tweets, or truths, or whatever, these are neologisms. Choose your own new in server.js -->
-    <h2>&mdash; Your {{{postNeoType}}}s &mdash;</h2>
-    
+    {{#ifCond user currentUser}}
+        <h2>&mdash; Your {{{postNeoType}}}s &mdash;</h2>
+    {{else}}
+        <h2>&mdash; {{user.username}}'s {{{postNeoType}}}s &mdash;</h2>
+    {{/ifCond}}
     <!-- you'll need to make this conditaionl and #each expression work -->
     {{#if posts.length}}
         <ul>
