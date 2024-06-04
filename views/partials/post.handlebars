@@ -6,7 +6,7 @@
             <img src="{{#if this.avatar_url}}
                         {{this.avatar_url}}
                     {{else}}
-                        ../../images/{{this.username}}
+                        /images/{{this.username}}
                     {{/if}}" 
                     alt="User Avatar" 
                     class="header-avatar">
@@ -20,7 +20,7 @@
         <!-- the post -->
         <div class="post-status-bar">
            <!-- Determine whether to show like button OR the trashcan depending on the user-->
-            {{#ifCond user currentUser}}
+            {{#ifCond this.username currentUser.username}}
                 <div class="delete">
                     <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
                     <div class="num-likes">
@@ -29,7 +29,7 @@
                 </div>
             {{else}}
                 <div class="likes">
-                    {{#if (alreadyLiked this.likedBy user.username)}}
+                    {{#if (alreadyLiked this.likedBy this.username)}}
                         <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♥</button>
                     {{else}}
                         <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♡</button>
