@@ -42,7 +42,7 @@
             <h2>&mdash; Bio &mdash;</h2>
             <div id="actual-bio">
                 <p>{{user.bio}}</p>
-                {{#ifCond user currentUser}}
+                {{#ifCond user.username currentUser.username}}
                     <button type="button" class="gaegu-regular" onclick="editBio()">EDIT</button>
                 {{/ifCond}}
             </div>

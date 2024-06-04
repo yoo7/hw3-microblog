@@ -65,8 +65,6 @@
     that you have them.
     */
 
-    let allEmojis = [];  // Global list to hold all emojis
-
     setSortSelection();
 
     function setSortSelection() {
@@ -83,6 +81,7 @@
         // Determine sortType based on query parameters of current URL
         let sortType = window.location.search.split("?")
 
+        // Extract the source type from the query parameters
         if (sortType && sortType.length > 1) {
             sortType = sortType[1].split("=")[1];
         }
@@ -95,7 +94,7 @@
             newSelected = document.getElementById(sortType);
         }
 
-        // Valid sort type
+        // Is valid sort type
         if (newSelected) {
             newSelected.classList.add("selected");
         }
@@ -117,7 +116,7 @@
         window.location.href = "/?sort=" + newSelected.id;
     }
 
-    // TODO make a src to emojis.js with belo since same code as in home
+    // TODO make a src to emojis.js with below since same code as in home
     let allEmojis = [];  // Global list to hold all emojis
 
     function toggleEmojiPanel() {
