@@ -529,7 +529,7 @@ async function renderProfile(req, res) {
     const currUser = await getCurrentUser(req);
     const usersPosts = await findPostsByUser(user.username);
 
-    res.render("profile", { regError: req.query.error, posts: usersPosts, user: user, currentUser: currUser});
+    res.render("profile", { regError: req.query.error, posts: usersPosts, user: user, currentUser: currUser });
 }
 
 function updateLikes(currUsername, postLikes, likedBy) {
