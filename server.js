@@ -149,10 +149,10 @@ app.get("/", async (req, res) => {
     }
 
     const posts = await getPosts(sortType);
-    const user = await getCurrentUser(req) || {};
+    const currentUser = await getCurrentUser(req) || {};
 
     // Use home.handlebars
-    res.render("home", { posts, user });
+    res.render("home", { posts, currentUser });
 });
 
 // Error route: render error page
@@ -181,6 +181,13 @@ app.get("/profile", isAuthenticated, async (req, res) => {
     // Using the middleware isAuthenticated, which executes before the actual route function
     await renderProfile(req, res);
 });
+
+app.get("/profile/:username", isAuthenticated, async (req, res) => {
+    // Using the middleware isAuthenticated, which executes before the actual route function
+    console.log(req.params.username)
+    await renderProfile(req, res);
+});
+
 app.get("/avatar/:username", (req, res) => {
     // Serve the avatar image for the user
     const username = req.params.username;
@@ -526,16 +533,16 @@ function logoutUser(req, res) {
 // Function to render the profile page
 async function renderProfile(req, res) {
     let user = null;
+    const currUser = await getCurrentUser(req);
 
-    if (req.params !== undefined && req.params.length > 0 && req.params.username !== undefined) {
+    if (req.params !== undefined && req.params.username !== undefined) {
         user = await findUserByUsername(req.params.username);
     } else {
         user = await getCurrentUser(req);  // Default
     }
-
     const usersPosts = await findPostsByUser(user.username);
 
-    res.render("profile", { regError: req.query.error, posts: usersPosts, user: user });
+    res.render("profile", { regError: req.query.error, posts: usersPosts, user: user , currentUser: currUser});
 }
 
 function updateLikes(currUsername, postLikes, likedBy) {
