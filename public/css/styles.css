@@ -76,10 +76,20 @@ label, input, textarea, #actual-bio, .or, .title, nav, button {
     display: grid;
     font-size: 13px;
     align-items: center;
-    grid-template-columns: 1fr 30fr;
-    grid-template-rows: 30px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 100%;
     align-content: center;
     justify-content: space-between;
+    justify-items: center;
+}
+
+.status-buttons {
+    display: flex;
+    justify-self: flex-start;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: flex-start;
     justify-items: center;
 }
 
@@ -88,31 +98,41 @@ label, input, textarea, #actual-bio, .or, .title, nav, button {
     flex-direction: column;
 }
 
-.likes, .delete {
+.frame {
+    font-size: 13px;
+}
+
+.likes, .delete, .keep {
     display: flex;
     justify-content: center;
     justify-items: center;
     align-content: center;
     align-items: center;
+    justify-self: center;
+    align-self: center;
+    padding: 0;
+    margin: 0;
+    line-height: 10px;
 }
 
-.num-likes {
+.num-likes, .keep {
     white-space: nowrap;
 }
 
-.heart, .trash {
-    margin: auto 15px auto auto;
+.heart, .trash, .frame {
     border: none;
     background-color: transparent;
     color: black;
-    line-height: 20px;
+    margin: 0 0.5vw 0 0;
+    padding: 0;
 }
+
 
 button.heart, button.trash {
     width: 20px;
 }
 
-.heart:hover, .trash:hover {
+.heart:hover, .trash:hover, .frame:hover {
     background-color: transparent;
     color: black;
     cursor: pointer;
@@ -120,6 +140,7 @@ button.heart, button.trash {
 
 .timestamp {
     display: flex;
+    flex-wrap: wrap;
     justify-self: flex-end;
     text-align: right;
 }
@@ -512,17 +533,26 @@ footer {
         margin: auto 0 auto 3vw;
     }
 
-    .heart, .trash {
-        margin: auto 5vw auto auto;
-        line-height: 2vw;
+    .likes, .delete, .keep {
+        margin: 0;
+        padding: 0;
+    }
+
+    .heart, .trash, .frame {
+        margin: 0 4vw 0 0;
+        padding: 0;
     }
     
-    button.heart, button.trash {
+    button.heart, button.trash, button.frame {
         width: 2vw;
     }
 
     .post-status-bar {
         grid-template-columns: 1fr 8fr;
+        font-size: 2.7vw;
+    }
+
+    .frame {
         font-size: 2.7vw;
     }
 

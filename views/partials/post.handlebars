@@ -16,30 +16,40 @@
         <span class="title gaegu-regular bold">{{this.title}}</span>
     </div>
     <div class="post-content">
-        <span class="content gaegu-class">{{this.content}}</span>
+        <span class="content gaegu-regular">{{this.content}}</span>
 
         <div class="post-status-bar">
-           <!-- Determine whether to show like button OR the trashcan depending on the user-->
-            {{#ifCond this.username currentUser.username}}
-                <div class="delete">
-                    <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
-                    <div class="num-likes">
-                        <p>{{this.likes}} likes</p>
+            <div class="status-buttons">
+                <!-- Determine whether to show like button OR the trashcan depending on the user-->
+                {{#ifCond this.username currentUser.username}}
+                    <div class="delete">
+                        <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
+                        <div class="num-likes">
+                            <p>{{this.likes}} likes</p>
+                        </div>
                     </div>
-                </div>
-            {{else}}
-                <div class="likes">
-                    {{#if (alreadyLiked this.likedBy this.username)}}
-                        <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♥</button>
+                {{else}}
+                    <div class="likes">
+                        {{#if (alreadyLiked this.likedBy this.username)}}
+                            <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♥</button>
+                        {{else}}
+                            <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♡</button>
+                        {{/if}}
+                        
+                        <div class="num-likes">
+                            <p>{{this.likes}} likes</p>
+                        </div>
+                    </div>
+                {{/ifCond}}
+
+                <div class="keep">
+                    {{#if (notFramed this)}}
+                        <button type="frame" data-id={{this.id}} class="frame gaegu-regular" onclick="handleFrameClick(event)">◻ Frame It?</button>
                     {{else}}
-                        <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♡</button>
+                        <button type="frame" data-id={{this.id}} class="frame gaegu-regular">▣ Framed!</button>
                     {{/if}}
-                    
-                    <div class="num-likes">
-                        <p>{{this.likes}} likes</p>
-                    </div>
                 </div>
-            {{/ifCond}}
+            </div>
 
             <div class="timestamp">Noted at {{formatTimestamp this.timestamp}} by {{this.username}}</div>
         </div>        
@@ -88,10 +98,24 @@
         fetch("/delete/" + postId, {
             method: "POST",
         })
-        .then(response => response.text())
         .catch(error => console.error('Error:', error));
         
         // Remove from DOM
         postElement.remove();
-    }    
+    }
+
+    function handleFrameClick(event) {
+        // Similar strategy with delete
+        const button = event.target;
+        const postElement = button.parentElement.parentElement.parentElement.parentElement;
+        const postId = event.target.getAttribute("data-id");      
+
+        fetch("/frame/" + postId, {
+            method: "POST",
+        })
+        .catch(error => console.error('Error:', error));
+        
+        button.textContent = "▣ Framed!";
+        button.removeEventListener("click", handleFrameClick);
+    }
 </script>

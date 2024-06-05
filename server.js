@@ -84,6 +84,10 @@ app.engine(
             formatTimestamp: function(timestamp) {
                 const date = new Date(timestamp);
                 return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
+            },
+            notFramed: function(post) {
+                // TODO check if it has a timer associated with it
+                // TODO if it DOES, then it is not framed yet -- return true. Else, return false
             }
         },
     })
@@ -203,6 +207,11 @@ app.post("/delete/:id", isAuthenticated, async (req, res) => {
     const postId = req.params.id;
 
     await deletePost(postId);
+});
+app.post("/frame/:id", isAuthenticated, async (req, res) => {
+    const postId = req.params.id;
+
+    await framePost(postId);
 });
 app.get("/emojis", (req, res) => {
     // Code from 5/17/24 lecture from Dr. Posnett
@@ -668,15 +677,35 @@ async function deletePost(postId) {
     console.log("Deleting post...");
     const db = await getDbConnection();
 
-    // Turn off timer
-    // TODO get timerId
-    // clearTimeout(timerId);
+    try {
+        // Turn off timer (probably a function) and remove the timer from the local memory
+        // TODO get timerId
+        // clearTimeout(timerId);
 
-    // Delete post. If post doesn't exist, no changes are made
-    let qry = "DELETE FROM posts WHERE id=?";
-    await db.run(qry, [postId]);
+        // Delete post. If post doesn't exist, no changes are made
+        let qry = "DELETE FROM posts WHERE id=?";
+        await db.run(qry, [postId]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
 
     await db.close();
+}
+
+async function framePost(postId) {
+    const db = await getDbConnection();
+
+    try {
+        // TODO turn off timer (probably a function) and remove the timer from the local memory
+        let qry = "UPDATE posts SET deleteDate=? WHERE id=?";
+        await db.run(qry, [null, postId]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+
+    await db.close();
+    
+
 }
 
 // Function to get all posts, sorted by latest first
@@ -714,7 +743,7 @@ async function addPost(title, content, user, schedule, date) {
     const db = await getDbConnection();
     const deleteTime = (schedule === "on" ? new Date(date) : null);
     const currTime = getCurrTime();
-    const interval = 0;
+    let interval = 0;
 
     if (deleteTime !== null) {
         // Adjust for offset
