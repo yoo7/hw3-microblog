@@ -4,7 +4,6 @@
 <section class="profile">
     <div class="profile-container">
         <div class="profile-avatar">
-            <!-- Conditional rendering based on variables copied this code from main.handlebars-->
             <img src="{{#if user.avatar_url}}
                             {{user.avatar_url}}
                         {{else}}
@@ -29,12 +28,11 @@
                     <li id="2027">2027</li>
                 </ul>
             {{/ifCond}}
-            
         </section>
 
         
         <section class="user-change">
-            {{#ifCond user.username currentUser/username}}
+            {{#ifCond user.username currentUser.zusername}}
             <h2>&mdash; Change Username &mdash;</h2>
             <!-- errors will appear here -->
             {{#if regError}}
@@ -127,10 +125,21 @@
         yearOf2027.addEventListener("click", changeYear);
     }
 
-    function changeYear() {
+    function changeYear(event) {
+        const prevSelected = document.getElementsByClassName("selected");
+
+        if (prevSelected.length === 1) {
+            prevSelected[0].classList.remove("selected");
+            prevSelected[0].addEventListener("click", changeYear);
+        }
+
         const classYearElement = document.getElementById("class-year");
         classYearElement.style.display = "block";
         classYearElement.textContent = "Class of " + this.id;
+
+        event.target.classList.add("selected");
+        event.target.removeEventListener("click", changeYear);
+
         toggleDropdown();
     }
 </script>
