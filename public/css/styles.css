@@ -56,7 +56,7 @@ h2 {
     text-align: center;
 }
 
-label, input, textarea, .or, .title, nav, button {
+label, input, textarea, #actual-bio, .or, .title, nav, button {
     font-size: 20px;
 }
 
@@ -326,13 +326,18 @@ input {
     align-items: center;
 }
 
-.profile-container {
+.profile-container, #actual-bio {
     display: flex;
     flex-direction: column;
     justify-content: center;
     justify-items: center;
     align-content: center;
     align-items: center;
+}
+
+#actual-bio button {
+    margin: 2vw auto auto auto;
+    width: 70px;
 }
 
 .profile-info {
@@ -343,6 +348,20 @@ input {
 
 .profile-info p {
     margin: 12px;
+}
+
+#bio-edit {
+    display: none;
+    width: 40vw;
+}
+
+#bio-edit button {
+    width: 25%;
+}
+
+#bio-buttons button {
+    width: 25%;
+    padding: auto 2vw;
 }
 
 .title {
@@ -453,7 +472,7 @@ footer {
         flex-direction: column;
     }
 
-    label, input, textarea, .or, .title, nav, button, #dropdown {
+    label, input, textarea, #actual-bio, .or, .title, nav, button, #dropdown {
         font-size: 4.5vw;
     }
     
@@ -475,6 +494,10 @@ footer {
 
     .post {
         width: 70vw;
+    }
+
+    #bio-edit {
+        width: 90%;
     }
 
     #timer, #checkbox {
