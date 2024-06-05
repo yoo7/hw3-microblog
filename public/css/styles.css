@@ -352,7 +352,7 @@ input {
     align-items: center;
 }
 
-.profile-container, #actual-bio {
+.profile-container, .profile-info, #actual-bio {
     display: flex;
     flex-direction: column;
     justify-content: center;
