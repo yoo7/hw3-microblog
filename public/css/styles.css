@@ -240,6 +240,10 @@ input {
     margin: auto auto 7px 0;
 }
 
+.post-avatar a:hover {
+    cursor: pointer;
+}
+
 .posts-list, .user-posts {
     display: flex;
     flex-direction: column;
