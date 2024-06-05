@@ -81,6 +81,10 @@ app.engine(
 
                 return true;
             },
+            formatTimestamp: function(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
+            }
         },
     })
 );
@@ -449,9 +453,8 @@ function getCurrTime() {
     return currTime;
 }
 
-// Return nicely formatted time
-function formatTime(date) {
-    return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
+function dateObjToStr(date) {
+    return date.toISOString().slice(0,16);
 }
 
 // Function to add a new user to the users array
@@ -460,7 +463,7 @@ async function addUser(username, hashedGoogleId) {
 
     try {
         let qry = "INSERT INTO users(username, hashedGoogleId, memberSince) VALUES(?, ?, ?)";
-        await db.run(qry, [username, hashedGoogleId, formatTime(getCurrTime())]);
+        await db.run(qry, [username, hashedGoogleId, dateObjToStr(getCurrTime())]);
     } catch (error) {
         console.error("Error:", error);
     }
@@ -685,7 +688,7 @@ async function addPost(title, content, user, schedule, date) {
 
         // Add post to database
         let qry = "INSERT INTO posts(title, content, username, timestamp, deleteDate) VALUES(?, ?, ?, ?, ?)";
-        const result = await db.run(qry, [title, content, user.username, formatTime(currTime), formatTime(deleteTime)]);
+        const result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime), dateObjToStr(deleteTime)]);
 
         if (deleteTime !== null) {
             // Set up the timer and update the timer id corresponding to that post using the post's id

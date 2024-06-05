@@ -25,7 +25,7 @@ async function initializeDB() {
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             username TEXT NOT NULL,
-            timestamp DATETIME NOT NULL,
+            timestamp TEXT NOT NULL,
             likes INTEGER DEFAULT 0,
             likedBy STRING,
             deleteDate DATETIME,
@@ -35,15 +35,15 @@ async function initializeDB() {
 
     // Example data for posts and users
     const users = [
-        { username: "whatsyelp", hashedGoogleId: "hashedGoogleId1", avatar_url: "/images/whatsyelp", memberSince: "12/17/2023, 10:11 AM", bio: "yelp? don't know her" },
-        { username: "technologically-challenged", hashedGoogleId: "hashedGoogleId2", avatar_url: "/images/technologically-challenged", memberSince: "2/3/2024, 8:34 PM", bio: "how do i use this" },
-        { username: "SuperStudious", hashedGoogleId: "hashedGoogleId3", avatar_url: "/images/SuperStudious", memberSince: "3/2/2024, 3:12 PM", bio: "Currently studying..." },
+        { username: "whatsyelp", hashedGoogleId: "hashedGoogleId1", avatar_url: "/images/whatsyelp", memberSince: "2023-12-17T10:11", bio: "yelp? don't know her" },
+        { username: "technologically-challenged", hashedGoogleId: "hashedGoogleId2", avatar_url: "/images/technologically-challenged", memberSince: "2024-02-03T:20:34", bio: "how do i use this" },
+        { username: "SuperStudious", hashedGoogleId: "hashedGoogleId3", avatar_url: "/images/SuperStudious", memberSince: "2024-03-02T15:12", bio: "Currently studying..." },
     ];
 
     const posts = [
-        { title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "1/2/2024, 1:32 PM", likes: 4, likedBy: ""},
-        { title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "3/24/2024, 5:31 PM", likes: 2, likedBy: "" },
-        { title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "4/29/2024, 1:04 AM", likes: 5, likedBy: "" },
+        { title: "New pizza place", content: "new pizza place p good #notsponsored", username: "whatsyelp", timestamp: "2024-01-02T13:32", likes: 4, likedBy: ""},
+        { title: "it be like dat", content: "The printer isn't working :(", username: "technologically-challenged", timestamp: "2024-03-24T17:31", likes: 2, likedBy: "" },
+        { title: "MIDTERM SEASON...", content: "Studying for my web dev midterm...", username: "SuperStudious", timestamp: "2024-04-29T01:04", likes: 5, likedBy: "" },
     ];
 
     // Insert sample data into the database
