@@ -384,6 +384,9 @@ app.listen(PORT, () => {
 // Support Functions and Variables
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// Local timerId dictionary using Map
+let timerIdDictionary = new Map();
+
 // Code from 5/22 lecture with Dr. Posnett
 async function getDbConnection() {
     let db = null;
@@ -680,7 +683,7 @@ async function deletePost(postId) {
     try {
         // Turn off timer (probably a function) and remove the timer from the local memory
         // TODO get timerId
-        // clearTimeout(timerId);
+        clearTimeout(timerIdDictionary.get(postId));
 
         // Delete post. If post doesn't exist, no changes are made
         let qry = "DELETE FROM posts WHERE id=?";
@@ -761,7 +764,9 @@ async function addPost(title, content, user, schedule, date) {
 
             // Set up the timer and update the timer id corresponding to that post using the post's id
             const timerId = setTimeout(deletePost, interval, result.lastID);
+            const postId = result.lastID;
             // TODO store timerId elsewhere
+            timerIdDictionary.set(postId, timerId)
         } else if (deleteTime === null && interval === 0) {  // Did not schedule a delete time -- post should be permanent
             let qry = "INSERT INTO posts(title, content, username, timestamp) VALUES(?, ?, ?, ?)";
             result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime)]);
@@ -825,3 +830,4 @@ async function hashId(idToHash) {
         console.log("Error: ", err);
     }
 }
+
