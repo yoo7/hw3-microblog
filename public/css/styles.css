@@ -259,7 +259,7 @@ input {
     margin: auto 1vw auto auto;
 }
 
-#timer-toggle:hover {
+#timer-toggle:hover, #checkbox label {
     cursor: pointer;
 }
 

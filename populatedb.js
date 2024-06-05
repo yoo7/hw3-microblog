@@ -28,8 +28,7 @@ async function initializeDB() {
             timestamp TEXT NOT NULL,
             likes INTEGER DEFAULT 0,
             likedBy STRING,
-            deleteDate DATETIME,
-            timerId TEXT
+            deleteDate DATETIME
         );
     `);
 

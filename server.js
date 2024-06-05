@@ -332,6 +332,41 @@ app.post("/bio", isAuthenticated, async (req, res) => {
 // Server Activation
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+async function cleanupOverduePosts() {
+    // Clean up posts that were supposed to be deleted
+    const db = await getDbConnection();
+    let qry = "SELECT * FROM posts";
+    const posts = await db.all(qry);
+
+    for (const post of posts) {
+        // Permanent post
+        if (post.deleteDate === null || post.deleteDate === undefined) {
+            continue;
+        }
+
+        // Check how much time remaining
+        const currTime = getCurrTime();
+        const deleteTime = new Date(post.deleteDate);
+        deleteTime.setMinutes(deleteTime.getMinutes() - deleteTime.getTimezoneOffset());
+
+        const interval = (deleteTime - currTime) / 1000;  // Get difference in seconds
+
+        // Delete any overdue posts
+        if (interval <= 0) {
+            console.log("deleting overdue post...");
+            deletePost(post.id);
+        } else {
+            // Re-set up timer
+            console.log("setting up timer for", interval);
+            setTimeout(deletePost, interval, post.id);
+        }
+    }
+
+    await db.close();
+}
+
+cleanupOverduePosts();
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
@@ -634,13 +669,11 @@ async function deletePost(postId) {
     const db = await getDbConnection();
 
     // Turn off timer
-    let qry = "SELECT * FROM posts WHERE id=?"
-    const post = await db.get(qry, [postId]);
-    console.log("timerId:", JSON.parse(post.timerId));
-    clearTimeout(JSON.parse(post.timerId));
+    // TODO get timerId
+    // clearTimeout(timerId);
 
     // Delete post. If post doesn't exist, no changes are made
-    qry = "DELETE FROM posts WHERE id=?";
+    let qry = "DELETE FROM posts WHERE id=?";
     await db.run(qry, [postId]);
 
     await db.close();
@@ -681,27 +714,29 @@ async function addPost(title, content, user, schedule, date) {
     const db = await getDbConnection();
     const deleteTime = (schedule === "on" ? new Date(date) : null);
 
+    if (deleteTime !== null) {
+        // Adjust for offset
+        deleteTime.setMinutes(deleteTime.getMinutes() - deleteTime.getTimezoneOffset());
+    }
+
+    const currTime = getCurrTime();
+    const interval = deleteTime - currTime;
+
     try {
-        const currTime = getCurrTime();
-        const interval = (deleteTime - currTime) / 1000;  // Get difference in seconds
-        console.log("interval:", interval);
+        let result = null;
+        
+        if (deleteTime === null || interval > 0) {
+            // Add post to database only if supposed to be permanent or interval > 0
+            let qry = "INSERT INTO posts(title, content, username, timestamp, deleteDate) VALUES(?, ?, ?, ?, ?)";
+            result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime), dateObjToStr(deleteTime)]);
+        }
 
-        // Add post to database
-        let qry = "INSERT INTO posts(title, content, username, timestamp, deleteDate) VALUES(?, ?, ?, ?, ?)";
-        const result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime), dateObjToStr(deleteTime)]);
-
-        if (deleteTime !== null) {
+        // Set up timer
+        if (deleteTime !== null && interval > 0) {
+            console.log("interval:", interval);
             // Set up the timer and update the timer id corresponding to that post using the post's id
-            deleteTime.setMinutes(deleteTime.getMinutes() - deleteTime.getTimezoneOffset());
-            console.log("deleteTime:", deleteTime);
-
             const timerId = setTimeout(deletePost, interval, result.lastID);
-            console.log("timerId:", timerId);
-            // TODO need the frame button (I guess appear next to trash can) that turns off timer 
-        // TODO when server starts, it should also clear out any already expired posts
-
-            qry = "UPDATE posts SET timerId=? WHERE id=?";
-            await db.run(qry, [JSON.stringify(timerId), result.lastID]);
+            // TODO store timerId elsewhere
         }
     } catch (error) {
         console.error("Error:", error);
