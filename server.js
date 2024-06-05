@@ -86,8 +86,8 @@ app.engine(
                 return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
             },
             notFramed: function(post) {
-                // TODO check if it has a timer associated with it
-                // TODO if it DOES, then it is not framed yet -- return true. Else, return false
+                // Returns true if there is a timer id for it (not framed yet)
+                return (timerIdDictionary.get(post.id) !== undefined);
             }
         },
     })
@@ -362,11 +362,9 @@ async function cleanupOverduePosts() {
 
         // Delete any overdue posts
         if (interval <= 0) {
-            console.log("deleting overdue post...");
             deletePost(post.id);
         } else {
             // Re-set up timer
-            console.log("setting up timer for", interval);
             setTimeout(deletePost, interval, post.id);
         }
     }
@@ -386,6 +384,11 @@ app.listen(PORT, () => {
 
 // Local timerId dictionary using Map
 let timerIdDictionary = new Map();
+
+function destroyTimer(postId) {
+    clearTimeout(timerIdDictionary.get(postId));
+    timerIdDictionary.delete(postId);
+}
 
 // Code from 5/22 lecture with Dr. Posnett
 async function getDbConnection() {
@@ -681,9 +684,8 @@ async function deletePost(postId) {
     const db = await getDbConnection();
 
     try {
-        // Turn off timer (probably a function) and remove the timer from the local memory
-        // TODO get timerId
-        clearTimeout(timerIdDictionary.get(postId));
+        // Turn off timer
+        destroyTimer(postId);
 
         // Delete post. If post doesn't exist, no changes are made
         let qry = "DELETE FROM posts WHERE id=?";
@@ -699,7 +701,7 @@ async function framePost(postId) {
     const db = await getDbConnection();
 
     try {
-        // TODO turn off timer (probably a function) and remove the timer from the local memory
+        destroyTimer(postId);
         let qry = "UPDATE posts SET deleteDate=? WHERE id=?";
         await db.run(qry, [null, postId]);
     } catch (error) {
@@ -762,10 +764,9 @@ async function addPost(title, content, user, schedule, date) {
             let qry = "INSERT INTO posts(title, content, username, timestamp, deleteDate) VALUES(?, ?, ?, ?, ?)";
             result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime), dateObjToStr(deleteTime)]);
 
-            // Set up the timer and update the timer id corresponding to that post using the post's id
+            // Set up the timer and store timer id in local var
             const timerId = setTimeout(deletePost, interval, result.lastID);
             const postId = result.lastID;
-            // TODO store timerId elsewhere
             timerIdDictionary.set(postId, timerId)
         } else if (deleteTime === null && interval === 0) {  // Did not schedule a delete time -- post should be permanent
             let qry = "INSERT INTO posts(title, content, username, timestamp) VALUES(?, ?, ?, ?)";
