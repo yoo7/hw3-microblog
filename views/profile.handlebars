@@ -18,6 +18,18 @@
         <section class="profile-info">
             <p><span class="bold gaegu-class">Username:</span> {{user.username}}</p>
             <p><span class="bold gaegu-class">Member Since:</span> {{formatTimestamp user.memberSince}}</p>
+            <p><span class="bold gaegu-class" style="display:none" id="class-year"></p>
+
+            {{#ifCond user.username currentUser.username}}
+                <button type="button" id="year-dropdown" class="gaegu-regular" onclick="toggleDropdown()">Select Year</button>
+                <ul class="options">
+                    <li id="2024">2024</li>
+                    <li id="2025">2025</li>
+                    <li id="2026">2026</li>
+                    <li id="2027">2027</li>
+                </ul>
+            {{/ifCond}}
+            
         </section>
 
         
@@ -93,11 +105,32 @@
 </section>
 
 <script>
+    setYearSelection();
+
     function editBio() {
         const actualBio = document.getElementById("actual-bio");
         actualBio.style.display = actualBio.style.display === "none" ? "flex" : "none";
 
         const form = document.getElementById("bio-edit");
         form.style.display = form.style.display !== "flex" ? "flex" : "none";
+    }
+
+    function setYearSelection() {
+        const yearOf2024 = document.getElementById("2024");
+        const yearOf2025 = document.getElementById("2025");
+        const yearOf2026 = document.getElementById("2026");
+        const yearOf2027 = document.getElementById("2027");
+
+        yearOf2024.addEventListener("click", changeYear);
+        yearOf2025.addEventListener("click", changeYear);
+        yearOf2026.addEventListener("click", changeYear);
+        yearOf2027.addEventListener("click", changeYear);
+    }
+
+    function changeYear() {
+        const classYearElement = document.getElementById("class-year");
+        classYearElement.style.display = "block";
+        classYearElement.textContent = "Class of " + this.id;
+        toggleDropdown();
     }
 </script>
