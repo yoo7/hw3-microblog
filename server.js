@@ -209,7 +209,7 @@ app.post("/delete/:id", isAuthenticated, async (req, res) => {
     await deletePost(postId);
 });
 app.post("/frame/:id", isAuthenticated, async (req, res) => {
-    const postId = req.params.id;
+    const postId = parseInt(req.params.id);
 
     await framePost(postId);
 });
@@ -245,7 +245,7 @@ app.get("/auth/google/callback",
         // Hash the user id and then store that instead of directly storing the id
 		const googleId = req.user.id;
 
-		const hashedGoogleId = await hashId(googleId);
+		const hashedGoogleId = hashId(googleId);
 
         // Store hashed version in the session since we successfully authenticated
 		req.session.hashedGoogleId = hashedGoogleId;
@@ -680,7 +680,6 @@ async function getCurrentUser(req) {
 }
 
 async function deletePost(postId) {
-    console.log("Deleting post...");
     const db = await getDbConnection();
 
     try {
@@ -701,6 +700,7 @@ async function framePost(postId) {
     const db = await getDbConnection();
 
     try {
+        // Clear timer and update the database
         destroyTimer(postId);
         let qry = "UPDATE posts SET deleteDate=? WHERE id=?";
         await db.run(qry, [null, postId]);
@@ -709,8 +709,6 @@ async function framePost(postId) {
     }
 
     await db.close();
-    
-
 }
 
 // Function to get all posts, sorted by latest first
@@ -767,7 +765,7 @@ async function addPost(title, content, user, schedule, date) {
             // Set up the timer and store timer id in local var
             const timerId = setTimeout(deletePost, interval, result.lastID);
             const postId = result.lastID;
-            timerIdDictionary.set(postId, timerId)
+            timerIdDictionary.set(postId, timerId);
         } else if (deleteTime === null && interval === 0) {  // Did not schedule a delete time -- post should be permanent
             let qry = "INSERT INTO posts(title, content, username, timestamp) VALUES(?, ?, ?, ?)";
             result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime)]);
@@ -823,9 +821,9 @@ function generateAvatar(letter, width = 100, height = 100) {
     return canvasImg.toBuffer("image/png");
 }
 
-async function hashId(idToHash) {
+function hashId(idToHash) {
     try{
-        const hashedId = await crypto.createHash("sha256").update(idToHash).digest("hex");
+        const hashedId = crypto.createHash("sha256").update(idToHash).digest("hex");
         return hashedId;
     } catch (err) {
         console.log("Error: ", err);

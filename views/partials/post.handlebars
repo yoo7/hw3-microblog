@@ -92,13 +92,16 @@
     function handleDeleteClick(event) {
         // Climb up html hierachy to locate post html element
         // Hierarchy: button -> delete div -> post-status-bar -> post-content -> post
-        const postElement = event.target.parentElement.parentElement.parentElement.parentElement;
+        const postElement = event.target.parentElement.parentElement.parentElement.parentElement.parentElement;
         const postId = event.target.getAttribute("data-id");      
 
         fetch("/delete/" + postId, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error("Error:", error));
         
         // Remove from DOM
         postElement.remove();
@@ -107,13 +110,16 @@
     function handleFrameClick(event) {
         // Similar strategy with delete
         const button = event.target;
-        const postElement = button.parentElement.parentElement.parentElement.parentElement;
+        const postElement = button.parentElement.parentElement.parentElement.parentElement.parentElement;
         const postId = event.target.getAttribute("data-id");      
 
         fetch("/frame/" + postId, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error("Error:", error));
         
         button.textContent = "▣ Framed!";
         button.removeEventListener("click", handleFrameClick);
