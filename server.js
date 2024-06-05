@@ -82,11 +82,12 @@ app.engine(
                 return true;
             },
             formatTimestamp: function(timestamp) {
+                // Return nicely formatted string for the timestamp
                 const date = new Date(timestamp);
                 return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
             },
             notFramed: function(post) {
-                // Returns true if there is a timer id for it (not framed yet)
+                // Returns true if there is a timer id for this post (this post hasn't been framed yet)
                 return (timerIdDictionary.get(post.id) !== undefined);
             },
         },
@@ -294,22 +295,7 @@ app.post("/changeUser", isAuthenticated, async (req, res) => {
         const newUsername = req.body.username;
     
         try {
-            // TODO make a function for this
-            // Update username in users table
-            let qry = "UPDATE users SET username=? WHERE username=?";
-            await db.run(qry, [newUsername, currUser.username]);
-
-            // Update the name associated with their posts
-            qry = "UPDATE posts SET username=? WHERE username=?";
-            await db.run(qry, [newUsername, currUser.username]);
-
-            // Generate new avatar and delete old avatar
-            handleAvatar(req, res);
-            fs.unlink(path.join("public", currUser.avatar_url),  (err) => {
-                if (err) {
-                    console.error("Error:", err);
-                }
-            });
+            updateUsername(db, newUsername, currUser, req, res);
         } catch (error) {
             console.error("Error:", error);
         }
@@ -413,6 +399,7 @@ async function findUserByUsername(username) {
     return user;
 }
 
+// Function to find a user by their hashed Google id
 async function findUserByHashedGoogleId(hashedGoogleId) {
     const db = await getDbConnection();
     let user = null;
@@ -452,6 +439,7 @@ async function findPostsByUser(username, sortType="timestamp DESC") {
     let posts = null;
 
     try {
+        // Grab all posts from this user
         let qry = `SELECT * FROM posts WHERE username=? ORDER BY ${sortType}`;
         posts = await db.all(qry, [username]);
     } catch (error) {
@@ -467,11 +455,11 @@ async function findPostsByUser(username, sortType="timestamp DESC") {
 async function findPostById(postId) {
     // Turn the id from string to number
     const id = parseInt(postId);
-
     const db = await getDbConnection();
     let post = null;
 
     try {
+        // Grab the post with postId
         let qry = "SELECT * FROM posts WHERE id=?";
         post = await db.get(qry, [id]);
     } catch (error) {
@@ -493,11 +481,12 @@ function getCurrTime() {
     return currTime;
 }
 
+// Convert Date object to a string
 function dateObjToStr(date) {
     return date.toISOString().slice(0,16);
 }
 
-// Function to add a new user to the users array
+// Function to add a new user to the database
 async function addUser(username, hashedGoogleId) {
     const db = await getDbConnection();
 
@@ -534,6 +523,7 @@ async function registerUsername(req, res) {
         await addUser(req.body.username, req.session.hashedGoogleId);
         handleAvatar(req, res);
 
+        // Fill in session info and redirect
         user = await findUserByUsername(req.body.username);
         req.session.userId = user.id;
         req.session.loggedIn = true;
@@ -561,7 +551,7 @@ async function renderProfile(req, res) {
     const user = await findUserByUsername(req.params.username);
     const currUser = await getCurrentUser(req);
     const usersPosts = await findPostsByUser(user.username);
-    const selectedClass = (user.classOf !== null && user.classOf !== undefined);
+    const selectedClass = (user.classOf !== null && user.classOf !== undefined);  // There's a class associated with this user
 
     res.render("profile", { regError: req.query.error, posts: usersPosts, user: user, currentUser: currUser, selectedClass: selectedClass });
 }
@@ -586,6 +576,7 @@ function updateLikes(currUsername, postLikes, likedBy) {
         likedBy = leftSubstr + rightSubstr;
     }
 
+    // Return numlikes and the string of usernames who liked this post
     return [postLikes, likedBy];
 }
 
@@ -615,6 +606,7 @@ async function updatePostLikes(req, res) {
             post.likes = res[0];
             likedBy = res[1];
 
+            // Update database
             qry = "UPDATE posts SET likes = ?, likedBy = ? WHERE username = ?";
             await db.run(qry, [post.likes, likedBy, postUser.username]);
         } catch (error) {
@@ -653,6 +645,7 @@ async function handleAvatar(req, res) {
         const url = path.join("public", "images", username);
         const avatar_url = path.join("/", "images", username);
 
+        // Update database and create file
         let qry = "UPDATE users SET avatar_url = ? WHERE username = ?";
         await db.run(qry, [avatar_url, username]);
 
@@ -670,6 +663,7 @@ async function getCurrentUser(req) {
     return user;
 }
 
+// Delete given post
 async function deletePost(postId) {
     const db = await getDbConnection();
 
@@ -687,6 +681,7 @@ async function deletePost(postId) {
     await db.close();
 }
 
+// Make the post permanent
 async function framePost(postId) {
     const db = await getDbConnection();
 
@@ -747,7 +742,7 @@ async function addPost(title, content, user, schedule, date) {
 
     try {
         let result = null;
-        // TODO maybe put into another function? for clarity
+
         // Nonzero interval for delete time
         if (deleteTime !== null && interval > 0) {
             let qry = "INSERT INTO posts(title, content, username, timestamp, deleteDate) VALUES(?, ?, ?, ?, ?)";
@@ -768,13 +763,31 @@ async function addPost(title, content, user, schedule, date) {
     await db.close();
 }
 
+async function updateUsername(db, newUsername, currUser, req, res) {
+    // Update username in users table
+    let qry = "UPDATE users SET username=? WHERE username=?";
+    await db.run(qry, [newUsername, currUser.username]);
+
+    // Update the name associated with their posts
+    qry = "UPDATE posts SET username=? WHERE username=?";
+    await db.run(qry, [newUsername, currUser.username]);
+
+    // Generate new avatar and delete old avatar
+    handleAvatar(req, res);
+    fs.unlink(path.join("public", currUser.avatar_url),  (err) => {
+        if (err) {
+            console.error("Error:", err);
+        }
+    });
+}
+
+// Update database with the year given
 async function updateClass(req) {
     const db = await getDbConnection();
     const year = req.params.year;
     const currUser = await getCurrentUser(req);
 
     try {
-        // Update database
         let qry = "UPDATE users SET classOf=? WHERE id=?";
         await db.run(qry, [year, currUser.id]);
     } catch (error) {
@@ -784,14 +797,13 @@ async function updateClass(req) {
     await db.close();
 }
 
+// Update bio with the bio given
 async function updateBio(req, res) {
     const bio = req.body.content;
     const user = await findUserById(req.session.userId);
-
     const db = await getDbConnection();
 
     try {
-        // Update bio
         let qry = "UPDATE users SET bio=? WHERE username=?";
         await db.run(qry, [bio, user.username]);
     } catch (error) {
@@ -847,6 +859,7 @@ function generateAvatar(letter, width = 100, height = 100) {
     return canvasImg.toBuffer("image/png");
 }
 
+// Hash the Google id
 function hashId(idToHash) {
     try{
         const hashedId = crypto.createHash("sha256").update(idToHash).digest("hex");
