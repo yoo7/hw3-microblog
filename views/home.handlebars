@@ -11,6 +11,16 @@
 
                 <textarea class="gaegu-regular" id="content" name="content" required=true placeholder="What's happening?"></textarea>
 
+                <div id="checkbox">
+                    <input class="gaegu-regular" type="checkbox" id="timer-toggle" name="schedule" onclick="toggleSchedule()"/>
+                    <label for="timer-toggle">Schedule delete</label>
+                </div>
+
+                <div id="timer">
+                    <label for="auto-delete">Delete on:</label>
+                    <input type="datetime-local" id="auto-delete" name="deleteDate" required=false class="gaegu-regular"/>
+                </div>
+
                 <div class="form-actions">
                     <button type="button" class="gaegu-regular" onclick="toggleEmojiPanel()">😀</button>
                     <button type="submit" class="gaegu-regular">POST</button>
@@ -57,15 +67,16 @@
 
 
 <script>
-
-    /*
-    You want to show a subset of the emojis. About 200. However,
-    you also want the user to be able to search all emojis,
-    so, put them in this array when the array is empty so 
-    that you have them.
-    */
+    
 
     setSortSelection();
+
+    function setMinTime() {
+        // Earliest date is the current time
+        const currTime = new Date();
+        currTime.setMinutes(currTime.getMinutes() - currTime.getTimezoneOffset());
+        document.getElementById("auto-delete").min = currTime.toISOString().slice(0,16);
+    }
 
     function setSortSelection() {
         const recent = document.getElementById("recent");
@@ -116,6 +127,18 @@
         window.location.href = "/?sort=" + newSelected.id;
     }
 
-    console.log("location", window.location.href);
+    function toggleSchedule() {
+        const timer = document.getElementById("timer");
+        const schedule = document.getElementById("auto-delete");
+
+        timer.style.display = timer.style.display !== "grid" ? "grid" : "none";
+
+        if (timer.style.display === "grid") {
+            setMinTime();
+            schedule.setAttribute("required", "true");
+        } else {
+            schedule.setAttribute("required", "false");
+        }
+    }
 
 </script>

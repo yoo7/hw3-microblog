@@ -27,7 +27,9 @@ async function initializeDB() {
             username TEXT NOT NULL,
             timestamp DATETIME NOT NULL,
             likes INTEGER DEFAULT 0,
-            likedBy STRING
+            likedBy STRING,
+            deleteDate DATETIME,
+            timerId TEXT
         );
     `);
 

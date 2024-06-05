@@ -167,9 +167,11 @@ app.post("/posts", isAuthenticated, async (req, res) => {
     // Corresponds with the code that uses the form method in home.handlebars
     const title = req.body.title;
     const content = req.body.content;
+    const schedule = req.body.schedule;
+    const deleteDate = req.body.deleteDate;
     const user = await findUserById(req.session.userId);
 
-    await addPost(title, content, user);
+    await addPost(title, content, user, schedule, deleteDate);
     res.redirect("/");
 });
 app.post("/like/:id", isAuthenticated, (req, res) => {
@@ -192,30 +194,11 @@ app.get("/logout", isAuthenticated, (req, res) => {
     logoutUser(req, res);
 });
 app.post("/delete/:id", isAuthenticated, async (req, res) => {
-    // Delete a post if the current user is the owner
-    
-    // Uses requesting post's username to crosscheck with current logged in user
-    const postOwner = req.params.username;
-
+    // To reach this route, must be the current owner of the post (or, deleting post automatically after timer)
     // Also takes the postId from req
     const postId = req.params.id;
 
-    // Find the matching postid, then check if the 
-    // post writer is same as current writer. 
-    // If so, actually delete the post by splicing posts[id] out of array
-    if (postOwner === req.session.username) {
-        // They are the owner of this id
-        const db = await getDbConnection();
-
-        let qry = "DELETE FROM posts WHERE id=?";
-        await db.run(qry, [postId]);
-    
-        await db.close();
-        
-    } else {
-        // They're not the owner
-        res.redirect("/error");
-    }    
+    await deletePost(postId);
 });
 app.get("/emojis", (req, res) => {
     // Code from 5/17/24 lecture from Dr. Posnett
@@ -319,8 +302,7 @@ app.post("/changeUser", isAuthenticated, async (req, res) => {
     
         await db.close();
 
-        // TODO
-        res.redirect(`/profile`);
+        res.redirect(`/profile/${user.username}`);
     } 
 });
 app.post("/bio", isAuthenticated, async (req, res) => {
@@ -339,8 +321,7 @@ app.post("/bio", isAuthenticated, async (req, res) => {
 
     await db.close();
 
-    // TODO
-    res.redirect(`/profile`);
+    res.redirect(`/profile/${user.username}`);
 });
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -460,7 +441,16 @@ async function findPostById(postId) {
 
 // Function to get current time and return as string
 function getCurrTime() {
-    const date = new Date();
+    const currTime = new Date();
+
+    // Adjust time based on time zone
+    currTime.setMinutes(currTime.getMinutes() - currTime.getTimezoneOffset());
+
+    return currTime;
+}
+
+// Return nicely formatted time
+function formatTime(date) {
     return date.toLocaleTimeString([], {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
 }
 
@@ -470,7 +460,7 @@ async function addUser(username, hashedGoogleId) {
 
     try {
         let qry = "INSERT INTO users(username, hashedGoogleId, memberSince) VALUES(?, ?, ?)";
-        await db.run(qry, [username, hashedGoogleId, getCurrTime()]);
+        await db.run(qry, [username, hashedGoogleId, formatTime(getCurrTime())]);
     } catch (error) {
         console.error("Error:", error);
     }
@@ -636,6 +626,23 @@ async function getCurrentUser(req) {
     return user;
 }
 
+async function deletePost(postId) {
+    console.log("Deleting post...");
+    const db = await getDbConnection();
+
+    // Turn off timer
+    let qry = "SELECT * FROM posts WHERE id=?"
+    const post = await db.get(qry, [postId]);
+    console.log("timerId:", JSON.parse(post.timerId));
+    clearTimeout(JSON.parse(post.timerId));
+
+    // Delete post. If post doesn't exist, no changes are made
+    qry = "DELETE FROM posts WHERE id=?";
+    await db.run(qry, [postId]);
+
+    await db.close();
+}
+
 // Function to get all posts, sorted by latest first
 async function getPosts(sortType="timestamp DESC") {
     const db = await getDbConnection();
@@ -667,12 +674,32 @@ async function getPosts(sortType="timestamp DESC") {
 }
 
 // Function to add a new post
-async function addPost(title, content, user) {
+async function addPost(title, content, user, schedule, date) {
     const db = await getDbConnection();
+    const deleteTime = (schedule === "on" ? new Date(date) : null);
 
     try {
-        let qry = "INSERT INTO posts(title, content, username, timestamp) VALUES(?, ?, ?, ?)";
-        await db.run(qry, [title, content, user.username, getCurrTime()]);
+        const currTime = getCurrTime();
+        const interval = (deleteTime - currTime) / 1000;  // Get difference in seconds
+        console.log("interval:", interval);
+
+        // Add post to database
+        let qry = "INSERT INTO posts(title, content, username, timestamp, deleteDate) VALUES(?, ?, ?, ?, ?)";
+        const result = await db.run(qry, [title, content, user.username, formatTime(currTime), formatTime(deleteTime)]);
+
+        if (deleteTime !== null) {
+            // Set up the timer and update the timer id corresponding to that post using the post's id
+            deleteTime.setMinutes(deleteTime.getMinutes() - deleteTime.getTimezoneOffset());
+            console.log("deleteTime:", deleteTime);
+
+            const timerId = setTimeout(deletePost, interval, result.lastID);
+            console.log("timerId:", timerId);
+            // TODO need the frame button (I guess appear next to trash can) that turns off timer 
+        // TODO when server starts, it should also clear out any already expired posts
+
+            qry = "UPDATE posts SET timerId=? WHERE id=?";
+            await db.run(qry, [JSON.stringify(timerId), result.lastID]);
+        }
     } catch (error) {
         console.error("Error:", error);
     }

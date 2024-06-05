@@ -60,6 +60,14 @@ label, input, textarea, .or, .title, nav, button {
     font-size: 20px;
 }
 
+.post-form label {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    justify-items: center;
+    justify-self: center;
+}
+
 .content, footer, .options li {
     font-size: 17px;
 }
@@ -220,6 +228,51 @@ input {
     align-items: center;
 }
 
+#timer, #checkbox {
+    margin: 15px auto 20px auto;
+    width: 100%;
+}
+
+#timer {
+    display: none;
+    justify-self: center;
+    justify-content: space-around;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+#checkbox, #timer {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+#timer {
+    display: none;
+}
+
+#timer-toggle {
+    margin: auto 1vw auto auto;
+}
+
+#timer-toggle:hover {
+    cursor: pointer;
+}
+
+#auto-delete {
+    width: 90%;
+    margin: auto 0;
+    padding: 0;
+}
+
+#auto-delete:hover {
+    cursor: pointer;
+}
+
 .options {
     display: none;
 }
@@ -334,6 +387,7 @@ button {
 
 button:hover {
     background-color: #6aaaba;
+    cursor: pointer;
 }
 
 footer {
@@ -394,6 +448,11 @@ footer {
         height: auto;
     }
 
+    .content-container {
+        display: flex;
+        flex-direction: column;
+    }
+
     label, input, textarea, .or, .title, nav, button, #dropdown {
         font-size: 4.5vw;
     }
@@ -416,6 +475,14 @@ footer {
 
     .post {
         width: 70vw;
+    }
+
+    #timer, #checkbox {
+        margin: 1vw auto 1.5vw auto;
+    }
+    
+    #timer-toggle {
+        margin: auto 4vw auto auto;
     }
 
     .timestamp {
