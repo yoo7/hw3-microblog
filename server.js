@@ -88,7 +88,7 @@ app.engine(
             notFramed: function(post) {
                 // Returns true if there is a timer id for it (not framed yet)
                 return (timerIdDictionary.get(post.id) !== undefined);
-            }
+            },
         },
     })
 );
@@ -319,23 +319,11 @@ app.post("/changeUser", isAuthenticated, async (req, res) => {
         res.redirect(`/profile/${newUsername}`);
     } 
 });
+app.post("/class/:year", isAuthenticated, async (req, res) => {
+    await updateClass(req);
+});
 app.post("/bio", isAuthenticated, async (req, res) => {
-    const bio = req.body.content;
-    const user = await findUserById(req.session.userId);
-
-    const db = await getDbConnection();
-
-    try {
-        // Update bio
-        let qry = "UPDATE users SET bio=? WHERE username=?";
-        await db.run(qry, [bio, user.username]);
-    } catch (error) {
-        console.error("Error:", error);
-    }
-
-    await db.close();
-
-    res.redirect(`/profile/${user.username}`);
+    await updateBio(req, res);
 });
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -367,6 +355,7 @@ async function cleanupOverduePosts() {
         } else {
             // Re-set up timer
             setTimeout(deletePost, interval, post.id);
+            timerIdDictionary.set(post.id, timerId);
         }
     }
 
@@ -572,8 +561,9 @@ async function renderProfile(req, res) {
     const user = await findUserByUsername(req.params.username);
     const currUser = await getCurrentUser(req);
     const usersPosts = await findPostsByUser(user.username);
+    const selectedClass = (user.classOf !== null && user.classOf !== undefined);
 
-    res.render("profile", { regError: req.query.error, posts: usersPosts, user: user, currentUser: currUser });
+    res.render("profile", { regError: req.query.error, posts: usersPosts, user: user, currentUser: currUser, selectedClass: selectedClass });
 }
 
 function updateLikes(currUsername, postLikes, likedBy) {
@@ -776,6 +766,41 @@ async function addPost(title, content, user, schedule, date) {
     }
 
     await db.close();
+}
+
+async function updateClass(req) {
+    const db = await getDbConnection();
+    const year = req.params.year;
+    const currUser = await getCurrentUser(req);
+
+    try {
+        // Update database
+        let qry = "UPDATE users SET classOf=? WHERE id=?";
+        await db.run(qry, [year, currUser.id]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+
+    await db.close();
+}
+
+async function updateBio(req, res) {
+    const bio = req.body.content;
+    const user = await findUserById(req.session.userId);
+
+    const db = await getDbConnection();
+
+    try {
+        // Update bio
+        let qry = "UPDATE users SET bio=? WHERE username=?";
+        await db.run(qry, [bio, user.username]);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+
+    await db.close();
+
+    res.redirect(`/profile/${user.username}`);
 }
 
 // Function to generate an image avatar

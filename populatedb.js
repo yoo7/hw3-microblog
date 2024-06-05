@@ -17,7 +17,8 @@ async function initializeDB() {
             hashedGoogleId TEXT NOT NULL UNIQUE,
             avatar_url TEXT,
             memberSince DATETIME NOT NULL,
-            bio TEXT DEFAULT "Hello world!"
+            bio TEXT DEFAULT "Hello world!",
+            classOf TEXT
         );
 
         CREATE TABLE IF NOT EXISTS posts (
@@ -34,9 +35,9 @@ async function initializeDB() {
 
     // Example data for posts and users
     const users = [
-        { username: "whatsyelp", hashedGoogleId: "hashedGoogleId1", avatar_url: "/images/whatsyelp", memberSince: "2023-12-17T10:11", bio: "yelp? don't know her" },
-        { username: "technologically-challenged", hashedGoogleId: "hashedGoogleId2", avatar_url: "/images/technologically-challenged", memberSince: "2024-02-03T:20:34", bio: "how do i use this" },
-        { username: "SuperStudious", hashedGoogleId: "hashedGoogleId3", avatar_url: "/images/SuperStudious", memberSince: "2024-03-02T15:12", bio: "Currently studying..." },
+        { username: "whatsyelp", hashedGoogleId: "hashedGoogleId1", avatar_url: "/images/whatsyelp", memberSince: "2023-12-17T10:11", bio: "yelp? don't know her", classOf: "2024" },
+        { username: "technologically-challenged", hashedGoogleId: "hashedGoogleId2", avatar_url: "/images/technologically-challenged", memberSince: "2024-02-03T:20:34", bio: "how do i use this", classOf: "2026" },
+        { username: "SuperStudious", hashedGoogleId: "hashedGoogleId3", avatar_url: "/images/SuperStudious", memberSince: "2024-03-02T15:12", bio: "Currently studying...", classOf: "2024" },
     ];
 
     const posts = [
