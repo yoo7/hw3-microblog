@@ -76,7 +76,7 @@ label, input, textarea, #actual-bio, .or, .title, nav, button {
     display: grid;
     font-size: 13px;
     align-items: center;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     grid-template-rows: 100%;
     align-content: center;
     justify-content: space-between;
@@ -135,14 +135,20 @@ button.heart, button.trash {
 .heart:hover, .trash:hover, .frame:hover {
     background-color: transparent;
     color: black;
-    cursor: pointer;
 }
 
 .timestamp {
     display: flex;
+    justify-content: flex-end;
     flex-wrap: wrap;
     justify-self: flex-end;
     text-align: right;
+    white-space: pre;
+}
+
+.timestamp a {
+    color: #63a3b3;
+    text-decoration: none;
 }
 
 .content-container {
@@ -240,10 +246,6 @@ input {
     margin: auto auto 7px 0;
 }
 
-.post-avatar a:hover {
-    cursor: pointer;
-}
-
 .posts-list, .user-posts {
     display: flex;
     flex-direction: column;
@@ -284,18 +286,18 @@ input {
     margin: auto 1vw auto auto;
 }
 
-#timer-toggle:hover, #checkbox label {
-    cursor: pointer;
-}
-
 #auto-delete {
     width: 90%;
     margin: auto 0;
     padding: 0;
 }
 
-#auto-delete:hover {
+.clickable:hover {
     cursor: pointer;
+}
+
+#already-framed {
+    cursor: default;
 }
 
 .options {
@@ -309,7 +311,6 @@ input {
 
 .options li:hover {
     background-color: #FFFADD;
-    cursor: pointer;
 }
 
 .selected {

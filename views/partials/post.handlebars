@@ -2,7 +2,7 @@
 <div class="post">
     <div class="post-avatar">
         <!-- Conditional rendering based on variables -->
-        <a href="/profile/{{this.username}}">
+        <a href="/profile/{{this.username}}" class="clickable">
             <img src="{{#if this.avatar_url}}
                         {{this.avatar_url}}
                     {{else}}
@@ -23,7 +23,7 @@
                 <!-- Determine whether to show like button OR the trashcan depending on the user-->
                 {{#ifCond this.username currentUser.username}}
                     <div class="delete">
-                        <button type="button" data-id={{this.id}} class="trash" onclick="handleDeleteClick(event)">🗑️</button>
+                        <button type="button" data-id={{this.id}} class="clickable trash" onclick="handleDeleteClick(event)">🗑️</button>
                         <div class="num-likes">
                             <p>{{this.likes}} likes</p>
                         </div>
@@ -31,9 +31,9 @@
                 {{else}}
                     <div class="likes">
                         {{#if (alreadyLiked this.likedBy this.username)}}
-                            <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♥</button>
+                            <button type="button" data-id={{this.id}} class="clickable heart" onclick="handleLikeClick(event)">♥</button>
                         {{else}}
-                            <button type="button" data-id={{this.id}} class="heart" onclick="handleLikeClick(event)">♡</button>
+                            <button type="button" data-id={{this.id}} class="clickable heart" onclick="handleLikeClick(event)">♡</button>
                         {{/if}}
                         
                         <div class="num-likes">
@@ -44,14 +44,14 @@
 
                 <div class="keep">
                     {{#if (notFramed this)}}
-                        <button type="frame" data-id={{this.id}} class="frame gaegu-regular" onclick="handleFrameClick(event)">◻ Frame It?</button>
+                        <button type="frame" data-id={{this.id}} class="clickable frame gaegu-regular" onclick="handleFrameClick(event)">◻ Unframed</button>
                     {{else}}
-                        <button type="frame" data-id={{this.id}} class="frame gaegu-regular">▣ Framed!</button>
+                        <button type="frame" data-id={{this.id}} id="already-framed" class="frame gaegu-regular">▣ Framed!</button>
                     {{/if}}
                 </div>
             </div>
 
-            <div class="timestamp">Noted at {{formatTimestamp this.timestamp}} by {{this.username}}</div>
+            <div class="timestamp">Noted at {{formatTimestamp this.timestamp}} by <a href="/profile/{{this.username}}" class="clickable">{{this.username}}</a></div>
         </div>        
     </div>
 </div>
@@ -123,5 +123,6 @@
         
         button.textContent = "▣ Framed!";
         button.removeEventListener("click", handleFrameClick);
+        button.classList.remove("clickable");
     }
 </script>

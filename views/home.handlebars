@@ -12,13 +12,13 @@
                 <textarea class="gaegu-regular" id="content" name="content" required=true placeholder="What's happening?"></textarea>
 
                 <div id="checkbox">
-                    <input class="gaegu-regular" type="checkbox" id="timer-toggle" name="schedule" onclick="toggleSchedule()"/>
-                    <label for="timer-toggle">Schedule delete</label>
+                    <input class="clickable gaegu-regular" type="checkbox" id="timer-toggle" name="schedule" onclick="toggleSchedule()"/>
+                    <label for="timer-toggle" class="clickable">Schedule delete</label>
                 </div>
 
                 <div id="timer">
                     <label for="auto-delete">Delete on:</label>
-                    <input type="datetime-local" id="auto-delete" name="deleteDate" required=false disabled=true class="gaegu-regular"/>
+                    <input type="datetime-local" id="auto-delete" name="deleteDate" required=false disabled=true class="clickable gaegu-regular"/>
                 </div>
 
                 <div class="form-actions">
@@ -44,10 +44,10 @@
 
         <button type="button" id="dropdown" class="gaegu-regular" onclick="toggleDropdown()">Sort Posts</button>
         <ul class="options">
-            <li id="recent">Recent</li>
-            <li id="oldest">Oldest</li>
-            <li id="most-liked">Most Liked</li>
-            <li id="least-liked">Least Liked</li>
+            <li id="recent" class="clickable">Recent</li>
+            <li id="oldest" class="clickable">Oldest</li>
+            <li id="most-liked" class="clickable">Most Liked</li>
+            <li id="least-liked" class="clickable">Least Liked</li>
         </ul>
 
         <div class="show-posts">

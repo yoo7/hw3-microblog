@@ -22,7 +22,7 @@
 
         
         <section class="user-change">
-            {{#ifCond user currentUser}}
+            {{#ifCond user.username currentUser/username}}
             <h2>&mdash; Change Username &mdash;</h2>
             <!-- errors will appear here -->
             {{#if regError}}

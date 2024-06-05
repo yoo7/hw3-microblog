@@ -287,13 +287,14 @@ app.post("/changeUser", isAuthenticated, async (req, res) => {
 
     if (newUser) {
         // User already exists, so redirect to /registerUsername GET endpoint with these parameters
-        res.redirect(`/profile?error=Username+already+exists`);
+        res.redirect(`/profile/${currUser.username}?error=Username+already+exists`);
     } else {
         // Username doesn't exist, so we can register new user and redirect appropriately
         const db = await getDbConnection();
         const newUsername = req.body.username;
     
         try {
+            // TODO make a function for this
             // Update username in users table
             let qry = "UPDATE users SET username=? WHERE username=?";
             await db.run(qry, [newUsername, currUser.username]);
@@ -315,7 +316,7 @@ app.post("/changeUser", isAuthenticated, async (req, res) => {
     
         await db.close();
 
-        res.redirect(`/profile/${user.username}`);
+        res.redirect(`/profile/${newUsername}`);
     } 
 });
 app.post("/bio", isAuthenticated, async (req, res) => {
