@@ -713,31 +713,30 @@ async function getPosts(sortType="timestamp DESC") {
 async function addPost(title, content, user, schedule, date) {
     const db = await getDbConnection();
     const deleteTime = (schedule === "on" ? new Date(date) : null);
+    const currTime = getCurrTime();
+    const interval = 0;
 
     if (deleteTime !== null) {
         // Adjust for offset
         deleteTime.setMinutes(deleteTime.getMinutes() - deleteTime.getTimezoneOffset());
+        interval = deleteTime - currTime;
     }
-
-    const currTime = getCurrTime();
-    const interval = deleteTime - currTime;
 
     try {
         let result = null;
-        
-        if (deleteTime === null || interval > 0) {
-            // Add post to database only if supposed to be permanent or interval > 0
+        // TODO maybe put into another function? for clarity
+        // Nonzero interval for delete time
+        if (deleteTime !== null && interval > 0) {
             let qry = "INSERT INTO posts(title, content, username, timestamp, deleteDate) VALUES(?, ?, ?, ?, ?)";
             result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime), dateObjToStr(deleteTime)]);
-        }
 
-        // Set up timer
-        if (deleteTime !== null && interval > 0) {
-            console.log("interval:", interval);
             // Set up the timer and update the timer id corresponding to that post using the post's id
             const timerId = setTimeout(deletePost, interval, result.lastID);
             // TODO store timerId elsewhere
-        }
+        } else if (deleteTime === null && interval === 0) {  // Did not schedule a delete time -- post should be permanent
+            let qry = "INSERT INTO posts(title, content, username, timestamp) VALUES(?, ?, ?, ?)";
+            result = await db.run(qry, [title, content, user.username, dateObjToStr(currTime)]);
+        }  // If for some reason there was supposed to be scheduled deletion but interval = 0, don't bother adding the post
     } catch (error) {
         console.error("Error:", error);
     }

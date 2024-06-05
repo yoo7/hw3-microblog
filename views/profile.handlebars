@@ -95,11 +95,9 @@
 <script>
     function editBio() {
         const actualBio = document.getElementById("actual-bio");
-        console.log(actualBio);
         actualBio.style.display = actualBio.style.display === "none" ? "flex" : "none";
 
         const form = document.getElementById("bio-edit");
-        console.log("form:", form.style.display);
         form.style.display = form.style.display !== "flex" ? "flex" : "none";
     }
 </script>

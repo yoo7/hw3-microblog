@@ -18,7 +18,7 @@
 
                 <div id="timer">
                     <label for="auto-delete">Delete on:</label>
-                    <input type="datetime-local" id="auto-delete" name="deleteDate" required=false class="gaegu-regular"/>
+                    <input type="datetime-local" id="auto-delete" name="deleteDate" required=false disabled=true class="gaegu-regular"/>
                 </div>
 
                 <div class="form-actions">
@@ -135,9 +135,12 @@
 
         if (timer.style.display === "grid") {
             setMinTime();
-            schedule.setAttribute("required", "true");
+            schedule.addAt
+            schedule.setAttribute("required", true);
+            schedule.disabled = false;
         } else {
-            schedule.setAttribute("required", "false");
+            schedule.removeAttribute("required");
+            schedule.disabled = true;
         }
     }
 
