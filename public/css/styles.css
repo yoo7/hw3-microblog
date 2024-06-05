@@ -361,8 +361,12 @@ input {
     align-items: center;
 }
 
+#actual-bio p {
+    margin: 0;
+}
+
 #actual-bio button {
-    margin: 2vw auto auto auto;
+    margin: 1vw auto auto auto;
     width: 70px;
 }
 

@@ -26,17 +26,17 @@
             {{#ifCond user.username currentUser.username}}
                 <button type="button" id="year-dropdown" class="gaegu-regular" onclick="toggleDropdown()">Select Year</button>
                 <ul class="options">
-                    <li id="2024">2024</li>
-                    <li id="2025">2025</li>
-                    <li id="2026">2026</li>
-                    <li id="2027">2027</li>
+                    <li class="clickable year" id="2024">2024</li>
+                    <li class="clickable year" id="2025">2025</li>
+                    <li class="clickable year" id="2026">2026</li>
+                    <li class="clickable year" id="2027">2027</li>
                 </ul>
             {{/ifCond}}
         </section>
 
         
         <section class="user-change">
-            {{#ifCond user.username currentUser.zusername}}
+            {{#ifCond user.username currentUser.username}}
             <h2>&mdash; Change Username &mdash;</h2>
             <!-- errors will appear here -->
             {{#if regError}}
@@ -46,7 +46,7 @@
                 <!-- Following two lines from 5/15 lecture with Dr. Posnett -->
                 <label for="new-username">New Name:</label>
                 <input type="text" id="new-username" name="username" class="gaegu-regular">
-                <button type="submit" class="gaegu-regular">Submit</button>
+                <button type="submit" class="gaegu-regular">SUBMIT</button>
             </form>
             {{/ifCond}}
         </section>
@@ -87,7 +87,7 @@
 
 <section class="user-posts">
     <!-- you can call posts tweets, or truths, or whatever, these are neologisms. Choose your own new in server.js -->
-    {{#ifCond user currentUser}}
+    {{#ifCond user.username currentUser.username}}
         <h2>&mdash; Your {{{postNeoType}}}s &mdash;</h2>
     {{else}}
         <h2>&mdash; {{user.username}}'s {{{postNeoType}}}s &mdash;</h2>
@@ -118,23 +118,26 @@
     }
 
     function setYearSelection() {
-        const yearOf2024 = document.getElementById("2024");
-        const yearOf2025 = document.getElementById("2025");
-        const yearOf2026 = document.getElementById("2026");
-        const yearOf2027 = document.getElementById("2027");
+        const years = document.getElementsByClassName("year");
+        const classYear = document.getElementById("class-year").textContent.trim();
 
-        yearOf2024.addEventListener("click", changeYear);
-        yearOf2025.addEventListener("click", changeYear);
-        yearOf2026.addEventListener("click", changeYear);
-        yearOf2027.addEventListener("click", changeYear);
+        for (const year of years) {
+            if (year.id === classYear.slice(-4)) {
+                year.classList.add("selected");
+            } else {
+                year.addEventListener("click", changeYear);
+            }
+        }
     }
 
     function changeYear(event) {
         const prevSelected = document.getElementsByClassName("selected");
 
-        if (prevSelected.length === 1) {
-            prevSelected[0].classList.remove("selected");
-            prevSelected[0].addEventListener("click", changeYear);
+        // Something was already selected
+        if (prevSelected.length == 1) {
+            const selected = prevSelected[0];
+            selected.classList.remove("selected");
+            selected.addEventListener("click", changeYear);
         }
 
         const classYearElement = document.getElementById("class-year");
