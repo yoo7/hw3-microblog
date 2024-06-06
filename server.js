@@ -295,21 +295,7 @@ app.post("/changeUser", isAuthenticated, async (req, res) => {
         const newUsername = req.body.username;
     
         try {
-            // Update username in users table
-            let qry = "UPDATE users SET username=? WHERE username=?";
-            await db.run(qry, [newUsername, currUser.username]);
-
-            // Update the name associated with their posts
-            qry = "UPDATE posts SET username=? WHERE username=?";
-            await db.run(qry, [newUsername, currUser.username]);
-
-            // Generate new avatar and delete old avatar
-            handleAvatar(req, res);
-            fs.unlink(path.join("public", currUser.avatar_url),  (err) => {
-                if (err) {
-                    console.error("Error:", err);
-                }
-            });
+            await updateUsername(db, newUsername, currUser, req, res);
         } catch (error) {
             console.error("Error:", error);
         }
@@ -775,6 +761,24 @@ async function addPost(title, content, user, schedule, date) {
     }
 
     await db.close();
+}
+
+async function updateUsername(db, newUsername, currUser, req, res) {
+    // Update username in users table
+    let qry = "UPDATE users SET username=? WHERE username=?";
+    await db.run(qry, [newUsername, currUser.username]);
+
+    // Update the name associated with their posts
+    qry = "UPDATE posts SET username=? WHERE username=?";
+    await db.run(qry, [newUsername, currUser.username]);
+
+    // Generate new avatar and delete old avatar
+    handleAvatar(req, res);
+    fs.unlink(path.join("public", currUser.avatar_url),  (err) => {
+        if (err) {
+            console.error("Error:", err);
+        }
+    });
 }
 
 // Update database with the year given
